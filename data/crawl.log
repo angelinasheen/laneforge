@@ -813,3 +813,201 @@ seeds: +8040 new, 8040 total, 40 pages fetched
 2026-09-22 23:42:43,698 INFO laneforge.ingest.crawl: fetched NA1_5644066884 (GOLD) [524 this run]
 2026-09-22 23:42:44,937 INFO laneforge.ingest.crawl: fetched NA1_5643585314 (GOLD) [525 this run]
 2026-09-22 23:42:45,872 INFO laneforge.ingest.crawl: fetched NA1_5643014244 (GOLD) [526 this run]
+2026-09-22 23:43:59,664 INFO laneforge.ingest.crawl: fetched NA1_5642883946 (GOLD) [527 this run]
+2026-09-22 23:44:00,273 INFO laneforge.ingest.crawl: reject NA1_5642868567 before timeline: too_short: 462s < 960s
+2026-09-22 23:44:01,854 INFO laneforge.ingest.crawl: fetched NA1_5642396319 (GOLD) [528 this run]
+2026-09-22 23:44:02,669 INFO laneforge.ingest.crawl: fetched NA1_5642370745 (GOLD) [529 this run]
+2026-09-22 23:44:03,650 INFO laneforge.ingest.crawl: fetched NA1_5642328692 (GOLD) [530 this run]
+2026-09-22 23:44:04,747 INFO laneforge.ingest.crawl: fetched NA1_5642178342 (GOLD) [531 this run]
+2026-09-22 23:44:05,730 INFO laneforge.ingest.crawl: fetched NA1_5642155395 (GOLD) [532 this run]
+2026-09-22 23:44:06,527 INFO laneforge.ingest.crawl: fetched NA1_5642143853 (GOLD) [533 this run]
+2026-09-22 23:44:07,392 INFO laneforge.ingest.crawl: fetched NA1_5641748212 (GOLD) [534 this run]
+2026-09-22 23:44:08,170 INFO laneforge.ingest.crawl: fetched NA1_5641707686 (GOLD) [535 this run]
+2026-09-22 23:44:09,222 INFO laneforge.ingest.crawl: fetched NA1_5640771403 (GOLD) [536 this run]
+2026-09-22 23:44:10,564 INFO laneforge.ingest.crawl: fetched NA1_5639673899 (GOLD) [537 this run]
+2026-09-22 23:44:10,820 INFO laneforge.ingest.crawl: reject NA1_5639053989 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:44:11,035 INFO laneforge.ingest.crawl: reject NA1_5638969692 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:44:11,286 INFO laneforge.ingest.crawl: reject NA1_5638437027 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:44:11,572 INFO laneforge.ingest.crawl: reject NA1_5638405828 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:44:12,082 INFO laneforge.ingest.crawl: seed BG-H0eqItXc7 (GOLD IV): 0 match ids
+2026-09-22 23:44:12,525 INFO laneforge.ingest.crawl: seed p0a7SKHCSmpD (GOLD IV): 9 match ids
+2026-09-22 23:44:13,999 INFO laneforge.ingest.crawl: fetched NA1_5642940475 (GOLD) [538 this run]
+2026-09-22 23:44:14,949 INFO laneforge.ingest.crawl: fetched NA1_5642917935 (GOLD) [539 this run]
+2026-09-22 23:44:15,833 INFO laneforge.ingest.crawl: fetched NA1_5642367394 (GOLD) [540 this run]
+2026-09-22 23:44:16,009 INFO laneforge.ingest.crawl: reject NA1_5642353101 before timeline: too_short: 917s < 960s
+2026-09-22 23:44:17,273 INFO laneforge.ingest.crawl: fetched NA1_5642320186 (GOLD) [541 this run]
+2026-09-22 23:44:17,504 INFO laneforge.ingest.crawl: reject NA1_5638623113 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:44:17,704 INFO laneforge.ingest.crawl: reject NA1_5638601703 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:44:18,353 INFO laneforge.ingest.crawl: reject NA1_5638589390 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:44:18,567 INFO laneforge.ingest.crawl: reject NA1_5638565441 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:44:19,210 INFO laneforge.ingest.crawl: seed Z35Rnk8kdlcx (GOLD IV): 69 match ids
+2026-09-22 23:44:20,355 INFO laneforge.ingest.crawl: fetched NA1_5647271619 (GOLD) [542 this run]
+2026-09-22 23:44:21,198 INFO laneforge.ingest.crawl: fetched NA1_5647241462 (GOLD) [543 this run]
+2026-09-22 23:44:21,878 INFO laneforge.ingest.crawl: fetched NA1_5647221188 (GOLD) [544 this run]
+2026-09-22 23:44:22,902 INFO laneforge.ingest.crawl: fetched NA1_5647058795 (GOLD) [545 this run]
+2026-09-22 23:44:23,459 INFO laneforge.ingest.crawl: fetched NA1_5647042275 (GOLD) [546 this run]
+2026-09-22 23:44:24,363 INFO laneforge.ingest.crawl: fetched NA1_5646437230 (GOLD) [547 this run]
+2026-09-22 23:44:25,369 INFO laneforge.ingest.crawl: fetched NA1_5646340442 (GOLD) [548 this run]
+2026-09-22 23:44:26,099 INFO laneforge.ingest.crawl: fetched NA1_5646339149 (GOLD) [549 this run]
+2026-09-22 23:44:27,154 INFO laneforge.ingest.crawl: fetched NA1_5646333372 (GOLD) [550 this run]
+2026-09-22 23:44:28,215 INFO laneforge.ingest.crawl: fetched NA1_5645967261 (GOLD) [551 this run]
+2026-09-22 23:44:28,424 INFO laneforge.ingest.crawl: reject NA1_5645944693 before timeline: too_short: 912s < 960s
+2026-09-22 23:44:29,373 INFO laneforge.ingest.crawl: fetched NA1_5645918543 (GOLD) [552 this run]
+2026-09-22 23:44:30,584 INFO laneforge.ingest.crawl: fetched NA1_5645878964 (GOLD) [553 this run]
+2026-09-22 23:44:31,876 INFO laneforge.ingest.crawl: fetched NA1_5645819803 (GOLD) [554 this run]
+2026-09-22 23:44:32,924 INFO laneforge.ingest.crawl: fetched NA1_5645788278 (GOLD) [555 this run]
+2026-09-22 23:44:34,186 INFO laneforge.ingest.crawl: fetched NA1_5645769451 (GOLD) [556 this run]
+2026-09-22 23:44:35,111 INFO laneforge.ingest.crawl: fetched NA1_5645148668 (GOLD) [557 this run]
+2026-09-22 23:44:35,941 INFO laneforge.ingest.crawl: fetched NA1_5645135483 (GOLD) [558 this run]
+2026-09-22 23:44:36,739 INFO laneforge.ingest.crawl: fetched NA1_5645086925 (GOLD) [559 this run]
+2026-09-22 23:44:37,485 INFO laneforge.ingest.crawl: fetched NA1_5645059429 (GOLD) [560 this run]
+2026-09-22 23:44:38,289 INFO laneforge.ingest.crawl: fetched NA1_5645050573 (GOLD) [561 this run]
+2026-09-22 23:44:39,422 INFO laneforge.ingest.crawl: fetched NA1_5644758361 (GOLD) [562 this run]
+2026-09-22 23:44:40,247 INFO laneforge.ingest.crawl: fetched NA1_5644734797 (GOLD) [563 this run]
+2026-09-22 23:44:41,133 INFO laneforge.ingest.crawl: fetched NA1_5644553472 (GOLD) [564 this run]
+2026-09-22 23:44:41,846 INFO laneforge.ingest.crawl: fetched NA1_5644533344 (GOLD) [565 this run]
+2026-09-22 23:44:42,705 INFO laneforge.ingest.crawl: fetched NA1_5644492404 (GOLD) [566 this run]
+2026-09-22 23:44:43,608 INFO laneforge.ingest.crawl: fetched NA1_5644476293 (GOLD) [567 this run]
+2026-09-22 23:44:44,937 INFO laneforge.ingest.crawl: fetched NA1_5644146862 (GOLD) [568 this run]
+2026-09-22 23:44:46,426 INFO laneforge.ingest.crawl: fetched NA1_5644114666 (GOLD) [569 this run]
+2026-09-22 23:45:59,391 INFO laneforge.ingest.crawl: fetched NA1_5644109106 (GOLD) [570 this run]
+2026-09-22 23:46:01,327 INFO laneforge.ingest.crawl: fetched NA1_5644078268 (GOLD) [571 this run]
+2026-09-22 23:46:02,525 INFO laneforge.ingest.crawl: fetched NA1_5643892343 (GOLD) [572 this run]
+2026-09-22 23:46:03,327 INFO laneforge.ingest.crawl: fetched NA1_5643876599 (GOLD) [573 this run]
+2026-09-22 23:46:03,495 INFO laneforge.ingest.crawl: reject NA1_5643884781 before timeline: too_short: 918s < 960s
+2026-09-22 23:46:04,670 INFO laneforge.ingest.crawl: fetched NA1_5643863158 (GOLD) [574 this run]
+2026-09-22 23:46:05,543 INFO laneforge.ingest.crawl: fetched NA1_5643320820 (GOLD) [575 this run]
+2026-09-22 23:46:06,498 INFO laneforge.ingest.crawl: fetched NA1_5643301322 (GOLD) [576 this run]
+2026-09-22 23:46:07,428 INFO laneforge.ingest.crawl: fetched NA1_5643287139 (GOLD) [577 this run]
+2026-09-22 23:46:08,304 INFO laneforge.ingest.crawl: fetched NA1_5643273414 (GOLD) [578 this run]
+2026-09-22 23:46:08,496 INFO laneforge.ingest.crawl: reject NA1_5642800276 before timeline: too_short: 930s < 960s
+2026-09-22 23:46:10,009 INFO laneforge.ingest.crawl: fetched NA1_5642771345 (GOLD) [579 this run]
+2026-09-22 23:46:11,345 INFO laneforge.ingest.crawl: fetched NA1_5642747363 (GOLD) [580 this run]
+2026-09-22 23:46:12,266 INFO laneforge.ingest.crawl: fetched NA1_5642714916 (GOLD) [581 this run]
+2026-09-22 23:46:13,083 INFO laneforge.ingest.crawl: fetched NA1_5642685235 (GOLD) [582 this run]
+2026-09-22 23:46:14,166 INFO laneforge.ingest.crawl: fetched NA1_5642117082 (GOLD) [583 this run]
+2026-09-22 23:46:14,922 INFO laneforge.ingest.crawl: fetched NA1_5642097444 (GOLD) [584 this run]
+2026-09-22 23:46:15,679 INFO laneforge.ingest.crawl: fetched NA1_5642091904 (GOLD) [585 this run]
+2026-09-22 23:46:16,446 INFO laneforge.ingest.crawl: fetched NA1_5642065704 (GOLD) [586 this run]
+2026-09-22 23:46:17,307 INFO laneforge.ingest.crawl: fetched NA1_5641580860 (GOLD) [587 this run]
+2026-09-22 23:46:18,128 INFO laneforge.ingest.crawl: fetched NA1_5641550570 (GOLD) [588 this run]
+2026-09-22 23:46:19,007 INFO laneforge.ingest.crawl: fetched NA1_5641522502 (GOLD) [589 this run]
+2026-09-22 23:46:19,715 INFO laneforge.ingest.crawl: fetched NA1_5641511911 (GOLD) [590 this run]
+2026-09-22 23:46:21,001 INFO laneforge.ingest.crawl: fetched NA1_5640847287 (GOLD) [591 this run]
+2026-09-22 23:46:21,848 INFO laneforge.ingest.crawl: fetched NA1_5640459152 (GOLD) [592 this run]
+2026-09-22 23:46:22,601 INFO laneforge.ingest.crawl: fetched NA1_5640422677 (GOLD) [593 this run]
+2026-09-22 23:46:23,355 INFO laneforge.ingest.crawl: fetched NA1_5640409051 (GOLD) [594 this run]
+2026-09-22 23:46:24,188 INFO laneforge.ingest.crawl: fetched NA1_5640381128 (GOLD) [595 this run]
+2026-09-22 23:46:25,100 INFO laneforge.ingest.crawl: fetched NA1_5640038476 (GOLD) [596 this run]
+2026-09-22 23:46:25,967 INFO laneforge.ingest.crawl: fetched NA1_5640016558 (GOLD) [597 this run]
+2026-09-22 23:46:26,705 INFO laneforge.ingest.crawl: fetched NA1_5639688419 (GOLD) [598 this run]
+2026-09-22 23:46:27,720 INFO laneforge.ingest.crawl: fetched NA1_5639653268 (GOLD) [599 this run]
+2026-09-22 23:46:28,798 INFO laneforge.ingest.crawl: fetched NA1_5639405260 (GOLD) [600 this run]
+2026-09-22 23:46:28,978 INFO laneforge.ingest.crawl: reject NA1_5639392656 before timeline: too_short: 915s < 960s
+2026-09-22 23:46:29,204 INFO laneforge.ingest.crawl: reject NA1_5639074056 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:46:29,628 INFO laneforge.ingest.crawl: reject NA1_5639038195 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:46:30,186 INFO laneforge.ingest.crawl: reject NA1_5638821624 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:46:30,831 INFO laneforge.ingest.crawl: reject NA1_5638797811 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:46:31,474 INFO laneforge.ingest.crawl: reject NA1_5638779217 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:46:32,101 INFO laneforge.ingest.crawl: reject NA1_5638758440 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:46:32,423 INFO laneforge.ingest.crawl: seed ZHVR34MxXWs4 (GOLD IV): 2 match ids
+2026-09-22 23:46:34,342 INFO laneforge.ingest.crawl: fetched NA1_5643661628 (GOLD) [601 this run]
+2026-09-22 23:46:35,157 INFO laneforge.ingest.crawl: fetched NA1_5643508167 (GOLD) [602 this run]
+2026-09-22 23:46:35,287 INFO laneforge.ingest.crawl: seed GQhptG7_eufA (GOLD IV): 0 match ids
+2026-09-22 23:46:35,570 INFO laneforge.ingest.crawl: seed 9hvMJKIoqdKF (GOLD IV): 0 match ids
+2026-09-22 23:46:36,082 INFO laneforge.ingest.crawl: seed 32h72n7wdEVW (GOLD IV): 61 match ids
+2026-09-22 23:46:37,208 INFO laneforge.ingest.crawl: fetched NA1_5647272867 (GOLD) [603 this run]
+2026-09-22 23:46:38,125 INFO laneforge.ingest.crawl: fetched NA1_5646927451 (GOLD) [604 this run]
+2026-09-22 23:46:38,970 INFO laneforge.ingest.crawl: fetched NA1_5646928040 (GOLD) [605 this run]
+2026-09-22 23:46:40,132 INFO laneforge.ingest.crawl: fetched NA1_5646916545 (GOLD) [606 this run]
+2026-09-22 23:46:40,884 INFO laneforge.ingest.crawl: fetched NA1_5646903592 (GOLD) [607 this run]
+2026-09-22 23:46:41,908 INFO laneforge.ingest.crawl: fetched NA1_5646905017 (GOLD) [608 this run]
+2026-09-22 23:46:42,104 INFO laneforge.ingest.crawl: reject NA1_5646899917 before timeline: too_short: 923s < 960s
+2026-09-22 23:46:42,282 INFO laneforge.ingest.crawl: reject NA1_5646896141 before timeline: too_short: 201s < 960s
+2026-09-22 23:46:42,470 INFO laneforge.ingest.crawl: reject NA1_5646891281 before timeline: early_surrender: remake
+2026-09-22 23:46:43,607 INFO laneforge.ingest.crawl: fetched NA1_5646531308 (GOLD) [609 this run]
+2026-09-22 23:46:45,100 INFO laneforge.ingest.crawl: fetched NA1_5646506154 (GOLD) [610 this run]
+2026-09-22 23:46:46,023 INFO laneforge.ingest.crawl: fetched NA1_5646217486 (GOLD) [611 this run]
+2026-09-22 23:46:46,639 INFO laneforge.ingest.crawl: reject NA1_5646203626 before timeline: too_short: 925s < 960s
+2026-09-22 23:47:58,958 ERROR laneforge.ingest: crawl failed: network error for https://americas.api.riotgames.com/lol/match/v5/matches/NA1_5646170236: [Errno 8] nodename nor servname provided, or not known
+Traceback (most recent call last):
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpcore/_sync/connection.py", line 101, in handle_request
+    raise exc
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpcore/_sync/connection.py", line 78, in handle_request
+    stream = self._connect(request)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpcore/_sync/connection.py", line 124, in _connect
+    stream = self._network_backend.connect_tcp(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpcore/_backends/sync.py", line 207, in connect_tcp
+    with map_exceptions(exc_map):
+  File "/opt/homebrew/Cellar/python@3.11/3.11.14/Frameworks/Python.framework/Versions/3.11/lib/python3.11/contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectError: [Errno 8] nodename nor servname provided, or not known
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/laneforge/ingest/riot.py", line 117, in _send
+    return self._http.get(url, params=dict(params or {}))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_client.py", line 1053, in get
+    return self.request(
+           ^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_transports/default.py", line 249, in handle_request
+    with map_httpcore_exceptions():
+  File "/opt/homebrew/Cellar/python@3.11/3.11.14/Frameworks/Python.framework/Versions/3.11/lib/python3.11/contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/.venv/lib/python3.11/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: [Errno 8] nodename nor servname provided, or not known
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/laneforge/ingest/__main__.py", line 38, in main
+    return args.handler(args, paths)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/laneforge/ingest/__main__.py", line 119, in cmd_crawl
+    report = crawl(client, paths, window, args.limit, patch=_patch(args))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/laneforge/ingest/crawl.py", line 148, in crawl
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/laneforge/ingest/crawl.py", line 175, in _crawl_seed
+    log.info("seed %s (%s %s): %d match ids", seed.puuid[:12], seed.tier, seed.division,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/laneforge/ingest/crawl.py", line 182, in _fetch_one
+    continue
+        ^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/laneforge/ingest/riot.py", line 90, in get_json
+    response = self._send(url, params)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/angie/Desktop/columbia/fall 2026/databases/project1/laneforge/laneforge/ingest/riot.py", line 119, in _send
+    raise RiotError(f"network error for {url}: {exc}") from exc
+laneforge.ingest.riot.RiotError: network error for https://americas.api.riotgames.com/lol/match/v5/matches/NA1_5646170236: [Errno 8] nodename nor servname provided, or not known

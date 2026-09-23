@@ -24,6 +24,8 @@ SERVER_ERROR_ATTEMPTS = 3
 SERVER_ERROR_BASE_DELAY_S = 1.0
 MAX_429_RETRIES = 5
 DEFAULT_RETRY_AFTER_S = 10.0
+NETWORK_ERROR_ATTEMPTS = 6          # 5 + 10 + 20 + 40 + 80 s of waiting before giving up
+NETWORK_ERROR_BASE_DELAY_S = 5.0
 REQUEST_TIMEOUT_S = 30.0
 
 AUTH_HELP = (
@@ -43,6 +45,10 @@ class RiotAuthError(RiotError):
 
 class NotFound(RiotError):
     """404: the resource does not exist (e.g. a timeline that was never stored)."""
+
+
+class RiotNetworkError(RiotError):
+    """DNS failure, connection reset, timeout: the request never got an answer."""
 
 
 class RiotServerError(RiotError):
@@ -85,9 +91,23 @@ class RiotClient:
         """
         server_failures = 0
         throttles = 0
+        network_failures = 0
         while True:
             self._limiter.acquire()
-            response = self._send(url, params)
+            try:
+                response = self._send(url, params)
+            except RiotNetworkError as exc:
+                # DNS blips and dropped connections happen over a multi-hour
+                # crawl; wait with growing patience, then stop cleanly so the
+                # checkpoint can resume the run later.
+                network_failures += 1
+                if network_failures >= NETWORK_ERROR_ATTEMPTS:
+                    raise RiotServerError(
+                        f"network still failing after {network_failures} attempts: {exc}") from exc
+                delay = NETWORK_ERROR_BASE_DELAY_S * 2 ** (network_failures - 1)
+                log.warning("%s; retrying in %.0fs", exc, delay)
+                self._sleep(delay)
+                continue
             self._limiter.observe_server_counts(response.headers.get("X-App-Rate-Limit-Count"))
             status = response.status_code
             if status == 200:
@@ -116,7 +136,7 @@ class RiotClient:
         try:
             return self._http.get(url, params=dict(params or {}))
         except httpx.TransportError as exc:
-            raise RiotError(f"network error for {url}: {exc}") from exc
+            raise RiotNetworkError(f"network error for {url}: {exc}") from exc
 
 
 def _decode(response: httpx.Response) -> Any:

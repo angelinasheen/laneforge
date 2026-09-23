@@ -106,3 +106,40 @@ def test_5xx_three_times_raises_server_error():
 def test_missing_key_is_an_auth_error():
     with pytest.raises(RiotAuthError):
         RiotClient("", RateLimiter())
+
+
+def test_network_error_retries_with_backoff_then_succeeds():
+    # Arrange: two DNS-style transport failures, then a good answer.
+    recorder = Recorder()
+    attempts = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        attempts.append(request)
+        if len(attempts) < 3:
+            raise httpx.ConnectError("nodename nor servname provided", request=request)
+        return httpx.Response(200, json={"ok": True})
+
+    limiter = RateLimiter(clock=recorder.clock, sleep=recorder.sleep)
+    client = RiotClient("RGAPI-test", limiter, transport=httpx.MockTransport(handler),
+                        sleep=recorder.sleep)
+
+    # Act
+    body = client.get_json(match_url("NA1_1"))
+
+    # Assert
+    assert body == {"ok": True}
+    assert recorder.sleeps == [5.0, 10.0]
+
+
+def test_persistent_network_error_ends_as_a_resumable_server_error():
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("no route to host", request=request)
+
+    recorder = Recorder()
+    limiter = RateLimiter(clock=recorder.clock, sleep=recorder.sleep)
+    client = RiotClient("RGAPI-test", limiter, transport=httpx.MockTransport(handler),
+                        sleep=recorder.sleep)
+
+    with pytest.raises(RiotServerError):
+        client.get_json(match_url("NA1_1"))
+    assert len(recorder.sleeps) == 5
