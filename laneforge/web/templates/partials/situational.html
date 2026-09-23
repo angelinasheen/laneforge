@@ -51,7 +51,7 @@
   <div class="rules">
   {%- for rule in situational.triggered %}
     <section class="rule" aria-labelledby="rule-{{ rule.key }}">
-      <p class="rule-head"><strong id="rule-{{ rule.key }}" class="runin-minor">{{ rule.item_class|capitalize }}.</strong> The {{ rule.reason }}.
+      <p class="rule-head"><strong id="rule-{{ rule.key }}" class="runin-minor">{{ rule.item_class|capitalize }}.</strong> {{ rule.reason }}.
       {%- set ce = situational.class_evidence.get(rule.key) %}
       {%- if ce %} In <span class="num">{{ ce.games|num }}</span> games where {{ champion.name }} faced {{ ce.condition_text }}, players who completed any {{ rule.item_class }} item won <span class="num">{{ ce.win_rate|pct1 }}</span>.{% endif %}</p>
       <ol class="suggestions">

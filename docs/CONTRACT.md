@@ -101,6 +101,11 @@ situational_items(conn, champion_id, role, opponent_champion_id, enemy_champion_
 #     physical_share >= 0.55  -> items with armor > 0
 #     healing_pm > p75        -> items with applies_grievous_wounds
 #     cc_pm > p75             -> items with tenacity_pct > 0
+#     'pen' (fifth, always evaluated): the lane opponent's relevant resist at level 11 >= 60
+#        -> armor-pen/lethality items when the user's champion deals mostly physical damage
+#           (its own threat profile at that role decides; tie -> most common first item), else
+#           magic-pen items. Its evidence condition is class-sized like the others: games where
+#           the lane opponent's champion has >= 60 of that resist at level 11.
 #   Candidate items: purchasable catalogue items matching the class (boots allowed here, e.g. Mercury's Treads).
 #   Evidence for item X under rule R: participant_core rows for (champion, role) where the rule
 #   condition holds on enemy_* columns, joined to purchase_event on that participant with item_id = X.

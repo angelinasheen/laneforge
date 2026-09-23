@@ -22,20 +22,20 @@ def triggered_rules(profile: CompProfile) -> tuple[Rule, ...]:
     """The four comp rules, in RULE_ORDER. Healing and CC compare strictly above p75."""
     rules = []
     if profile.magic_share >= MAGIC_SHARE_MIN:
-        rules.append(Rule("magic", f"comp is {profile.magic_share:.0%} magic damage",
+        rules.append(Rule("magic", f"The comp is {profile.magic_share:.0%} magic damage",
                           ITEM_CLASSES["magic"]))
     if profile.physical_share >= PHYSICAL_SHARE_MIN:
-        rules.append(Rule("physical", f"comp is {profile.physical_share:.0%} physical damage",
+        rules.append(Rule("physical", f"The comp is {profile.physical_share:.0%} physical damage",
                           ITEM_CLASSES["physical"]))
     if profile.healing_pm_p75 is not None and profile.healing_pm > profile.healing_pm_p75:
         rules.append(Rule("healing",
-                          f"comp heals {profile.healing_pm:,.0f} per minute "
-                          f"(75th percentile of comps: {profile.healing_pm_p75:,.0f})",
+                          f"The comp heals {profile.healing_pm:,.0f} per minute, above the "
+                          f"75th percentile of comps ({profile.healing_pm_p75:,.0f})",
                           ITEM_CLASSES["healing"]))
     if profile.cc_pm_p75 is not None and profile.cc_pm > profile.cc_pm_p75:
         rules.append(Rule("cc",
-                          f"comp deals {profile.cc_pm:.1f} s of crowd control per minute "
-                          f"(75th percentile of comps: {profile.cc_pm_p75:.1f} s)",
+                          f"The comp deals {profile.cc_pm:.1f} s of crowd control per minute, above "
+                          f"the 75th percentile of comps ({profile.cc_pm_p75:.1f} s)",
                           ITEM_CLASSES["cc"]))
     return tuple(rules)
 
@@ -66,7 +66,8 @@ def item_matches(rule_key: str, item: ItemRef, pen_kind: str = MAGIC) -> bool:
     return False
 
 
-def condition_text(rule_key: str, profile: CompProfile, opponent: ChampionRef) -> str:
+def condition_text(rule_key: str, profile: CompProfile, opponent: ChampionRef,
+                   pen_kind: str = MAGIC) -> str:
     if rule_key == "magic":
         return f"comps with at least {MAGIC_SHARE_MIN:.0%} magic damage"
     if rule_key == "physical":
@@ -75,4 +76,5 @@ def condition_text(rule_key: str, profile: CompProfile, opponent: ChampionRef) -
         return f"comps healing more than {profile.healing_pm_p75 or 0:,.0f} per minute"
     if rule_key == "cc":
         return f"comps with more than {profile.cc_pm_p75 or 0:.1f} s of crowd control per minute"
-    return f"games against {opponent.name}"
+    stat = "armor" if pen_kind == PHYSICAL else "magic resist"
+    return f"lane opponents with at least {PEN_RESIST_MIN:.0f} {stat} at level 11"

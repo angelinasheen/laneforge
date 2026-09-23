@@ -74,10 +74,13 @@ CREATE UNIQUE INDEX team_comp_profile_pk ON team_comp_profile (match_id, team);
 
 -- 5. The 75th percentiles that the healing and crowd-control rules compare against.
 CREATE MATERIALIZED VIEW comp_thresholds AS
-SELECT COUNT(*)                                                       AS comps,
+SELECT 1                                                              AS singleton,   -- unique key for CONCURRENTLY
+       COUNT(*)                                                       AS comps,
        percentile_cont(0.75) WITHIN GROUP (ORDER BY healing_pm)        AS healing_pm_p75,
        percentile_cont(0.75) WITHIN GROUP (ORDER BY cc_pm)             AS cc_pm_p75
 FROM team_comp_profile;
+
+CREATE UNIQUE INDEX comp_thresholds_pk ON comp_thresholds (singleton);
 
 -- 6. One row per participant with everything the build queries group over:
 --    outcome, lane opponent, first three completed legendaries in order, item

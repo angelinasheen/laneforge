@@ -6,6 +6,7 @@ from laneforge.queries.models import CompProfile
 from laneforge.queries.rules import pen_rule, triggered_rules
 from laneforge.queries.situational import comp_profile, situational_items
 from tests.query_fixtures import (
+    MORELLO,
     BANSHEES, DEATHCAP, GameMaker, LUDENS, MERCS, SERYLDA, YOUMUU, seed_catalogue,
 )
 
@@ -49,7 +50,7 @@ def test_rules_come_in_fixed_order_with_reasons():
     rules = triggered_rules(_profile(magic_share=0.6, physical_share=0.6, healing_pm=200,
                                      cc_pm=2))
     assert _keys(rules) == ["magic", "physical", "healing", "cc"]
-    assert rules[0].reason == "comp is 60% magic damage"
+    assert rules[0].reason == "The comp is 60% magic damage"
     assert rules[0].item_class == "magic resist"
 
 
@@ -124,7 +125,8 @@ def test_no_evidence_below_30_games(games):
 
 
 def test_pen_rule_offers_armor_pen_to_ad_champion(games):
-    games.games(TALON, ZED, 30, [YOUMUU, SERYLDA], wins=15)
+    games.games(TALON, ZED, 30, [YOUMUU, SERYLDA], wins=15,
+                blue_measures=dict(physical_damage=20000, magic_damage=1000))
     games.done()
 
     answer = situational_items(games.conn, TALON, "MIDDLE", ZED, [])
@@ -132,9 +134,21 @@ def test_pen_rule_offers_armor_pen_to_ad_champion(games):
     pen = [s for s in answer.suggestions if s.rule.key == "pen"]
     assert [s.item.item_id for s in pen] == [SERYLDA, YOUMUU]
     assert pen[0].score == pytest.approx(170 / 149 - 1)
-    assert pen[0].score_text == "Zed has 70 armor at level 11; raises your damage to Zed by 14%"
+    assert pen[0].score_text == "+14% damage to Zed"
     assert pen[0].evidence.games == 30
-    assert pen[0].evidence.condition_text == "games against Zed"
+    assert pen[0].evidence.condition_text == "lane opponents with at least 60 armor at level 11"
+
+
+def test_pen_kind_follows_the_champion_threat_profile_not_the_first_item(games):
+    # An AD bruiser who rushes a defensive first item still gets armor penetration.
+    games.games(TALON, ZED, 30, [MORELLO, YOUMUU], wins=15,
+                blue_measures=dict(physical_damage=20000, magic_damage=1000))
+    games.done()
+
+    answer = situational_items(games.conn, TALON, "MIDDLE", ZED, [])
+
+    pen = [s for s in answer.suggestions if s.rule.key == "pen"]
+    assert pen and pen[0].rule.item_class == "armor penetration"
 
 
 def test_ap_champion_gets_magic_pen_check_against_opponent_mr(games):

@@ -103,6 +103,8 @@ class LadderAnswer:
     fell_back: bool              # True when level > 1
     fallback_note: str | None    # "not enough Ahri vs Zed games; showing Ahri, mid, all opponents"
     rows: tuple[BuildRow, ...]
+    answered: bool = True        # False when no level's top row reached MIN_GAMES (the trust
+                                 # line must then say so instead of "answered at level 4")
 
 
 # --- situational ------------------------------------------------------------
@@ -182,6 +184,7 @@ class SavedBuild:
     is_customized: bool
     created_at: datetime
     stat_totals: dict[str, float]   # column-wise sums over the three items, keys = ItemRef stat fields
+    observed: BuildRow | None = None   # the matchup row this sequence corresponds to, when not customized
 
 
 # --- browsing ---------------------------------------------------------------
@@ -243,6 +246,7 @@ class RoleStats:
     healing_pm: float | None
     cc_pm: float | None
     profile_source: str          # 'role' | 'champion' | 'none'
+    sufficient: bool = True      # games >= MIN_GAMES; UI greys the win rate otherwise
 
 
 @dataclass(frozen=True)
@@ -252,6 +256,7 @@ class MatchupStat:
     games: int
     wins: int
     win_rate: float
+    sufficient: bool = True      # games >= MIN_GAMES
 
 
 @dataclass(frozen=True)

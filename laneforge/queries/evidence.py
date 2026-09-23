@@ -9,8 +9,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from laneforge.queries._rows import rate
-from laneforge.queries.models import MIN_GAMES, ChampionRef, CompProfile, Evidence
-from laneforge.queries.rules import MAGIC_SHARE_MIN, PHYSICAL_SHARE_MIN, condition_text
+from laneforge.queries.models import MIN_GAMES, REFERENCE_LEVEL, ChampionRef, CompProfile, Evidence
+from laneforge.queries.rules import (
+    MAGIC_SHARE_MIN, PEN_RESIST_MIN, PHYSICAL_SHARE_MIN, condition_text,
+)
+from laneforge.queries.statmodel import MAGIC
 from laneforge.queries.stats import wilson_interval
 
 CLASS_RULES = ("magic", "physical", "healing", "cc")
@@ -33,7 +36,12 @@ FROM (
           WHEN 'physical' THEN pc.enemy_physical_share >= %(physical_share_min)s
           WHEN 'healing'  THEN pc.enemy_healing_pm     >  %(healing_pm_p75)s
           WHEN 'cc'       THEN pc.enemy_cc_pm          >  %(cc_pm_p75)s
-          WHEN 'pen'      THEN pc.opponent_champion_id =  %(opponent_id)s
+          WHEN 'pen'      THEN pc.opponent_champion_id IN (
+                               SELECT o.champion_id FROM champion o
+                               WHERE CASE %(pen_kind)s
+                                       WHEN 'physical' THEN o.base_armor + o.armor_per_level * %(growth_levels)s
+                                       ELSE o.base_magic_resist + o.magic_resist_per_level * %(growth_levels)s
+                                     END >= %(pen_resist_min)s)
           ELSE FALSE
         END
 ) x
@@ -62,11 +70,14 @@ class EvidenceContext:
     role: str
     opponent: ChampionRef
     profile: CompProfile
+    pen_kind: str = MAGIC
 
     def params(self) -> dict:
         return {
             "champion_id": self.champion.champion_id, "role": self.role,
             "opponent_id": self.opponent.champion_id,
+            "pen_kind": self.pen_kind, "pen_resist_min": PEN_RESIST_MIN,
+            "growth_levels": REFERENCE_LEVEL - 1,
             "magic_share_min": MAGIC_SHARE_MIN, "physical_share_min": PHYSICAL_SHARE_MIN,
             "healing_pm_p75": self.profile.healing_pm_p75, "cc_pm_p75": self.profile.cc_pm_p75,
             "min_games": MIN_GAMES,
@@ -84,7 +95,7 @@ def item_evidence(conn, ctx: EvidenceContext, rule_key: str,
     if not item_ids:
         return {}
     params = {**ctx.params(), "rule": rule_key, "item_ids": item_ids}
-    text = condition_text(rule_key, ctx.profile, ctx.opponent)
+    text = condition_text(rule_key, ctx.profile, ctx.opponent, ctx.pen_kind)
     rows = conn.execute(SQL_ITEM_EVIDENCE, params).fetchall()
     return {r["item_id"]: _evidence(int(r["games"]), int(r["wins"]), text) for r in rows}
 
@@ -98,5 +109,6 @@ def class_evidence(conn, ctx: EvidenceContext, rule_keys: tuple[str, ...]) -> di
     for key in wanted:
         games, wins = int(row[f"{key}_games"]), int(row[f"{key}_wins"])
         if games >= MIN_GAMES:
-            out[key] = _evidence(games, wins, condition_text(key, ctx.profile, ctx.opponent))
+            out[key] = _evidence(games, wins,
+                                 condition_text(key, ctx.profile, ctx.opponent, ctx.pen_kind))
     return out

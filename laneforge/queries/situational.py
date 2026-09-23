@@ -9,7 +9,7 @@ from laneforge.queries.models import (
 )
 from laneforge.queries.rules import RULE_ORDER, item_matches, pen_rule, triggered_rules
 from laneforge.queries.statmodel import (
-    MAGIC, PHYSICAL, defensive_score, opponent_resist, penetration_score,
+    MAGIC, PHYSICAL, defensive_score, penetration_score,
 )
 from laneforge.queries.validate import require_distinct_matchup, require_enemies, require_role
 
@@ -114,8 +114,22 @@ def comp_profile(conn, role: str, opponent_champion_id: int,
     return _profile_from(members, thresholds, len(enemy_ids))
 
 
+SQL_DAMAGE_KIND = """
+SELECT physical_pm, magic_pm
+FROM champion_effective_profile
+WHERE champion_id = %(champion_id)s AND role = %(role)s
+"""
+
+
 def pen_kind(conn, champion_id: int, role: str) -> str:
-    """AD if the champion's most common first legendary here has AD or lethality, else magic."""
+    """Which resist the champion's damage runs into: their own threat profile
+    decides (physical vs magic per minute at this role, with the 50-game
+    fallback built into the view). With no games at all, the most common first
+    legendary decides; with no data of any kind, magic."""
+    row = conn.execute(SQL_DAMAGE_KIND, {"champion_id": champion_id, "role": role}).fetchone()
+    if row and row["physical_pm"] is not None and row["magic_pm"] is not None \
+            and float(row["physical_pm"]) != float(row["magic_pm"]):
+        return PHYSICAL if float(row["physical_pm"]) > float(row["magic_pm"]) else MAGIC
     row = conn.execute(SQL_FIRST_ITEM_KIND, {"champion_id": champion_id, "role": role}).fetchone()
     if row and (row["attack_damage"] > 0 or row["lethality"] > 0):
         return PHYSICAL
@@ -126,10 +140,7 @@ def _score(rule: Rule, champion: ChampionRef, item: ItemRef, profile: CompProfil
            opponent: ChampionRef, kind: str) -> tuple[float, str]:
     if rule.key == "pen":
         score = penetration_score(item, opponent, kind=kind)
-        stat = "armor" if kind == PHYSICAL else "magic resist"
-        resist = opponent_resist(opponent, kind)
-        return score, (f"{opponent.name} has {resist:.0f} {stat} at level 11; "
-                       f"raises your damage to {opponent.name} by {score:.0%}")
+        return score, f"+{score:.0%} damage to {opponent.name}"
     score = defensive_score(champion, item, profile)
     if score > 0:
         return score, f"+{score:,.0f} effective HP per 1,000 gold"
@@ -167,7 +178,8 @@ def situational_items(conn, champion_id: int, role: str, opponent_champion_id: i
     if not rules:
         return SituationalAnswer(profile=profile, triggered=(), suggestions=(), class_evidence={})
     candidates = [item_from_row(r) for r in conn.execute(SQL_SITUATIONAL_CANDIDATES).fetchall()]
-    context = ev.EvidenceContext(champion=champion, role=role, opponent=opponent, profile=profile)
+    context = ev.EvidenceContext(champion=champion, role=role, opponent=opponent,
+                                 profile=profile, pen_kind=kind)
     suggestions: list[Suggestion] = []
     for rule in rules:
         matching = [i.item_id for i in candidates if item_matches(rule.key, i, kind)]

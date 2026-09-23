@@ -133,8 +133,8 @@ CREATE TABLE build_item (
 ------------------------------------------------------------------------------
 -- Indexes for the query paths (see docs/CONTRACT.md).
 ------------------------------------------------------------------------------
-CREATE INDEX participant_champion_role_idx ON participant (champion_id, role);
 CREATE INDEX purchase_event_item_idx       ON purchase_event (item_id);
+CREATE INDEX build_item_item_idx           ON build_item (item_id);
 CREATE INDEX saved_build_user_idx          ON saved_build (user_id, created_at DESC);
 CREATE INDEX match_start_time_idx          ON match (start_time DESC);
 
@@ -150,8 +150,10 @@ DECLARE
   own_champ  INTEGER;
   own_opp    INTEGER;
 BEGIN
+  -- Lock the parent row so two transactions adding enemies to the same build
+  -- serialize here; otherwise both could read a count of 4 and both commit.
   SELECT champion_id, opponent_champion_id INTO own_champ, own_opp
-    FROM saved_build WHERE build_id = NEW.build_id;
+    FROM saved_build WHERE build_id = NEW.build_id FOR UPDATE;
   IF NEW.champion_id = own_champ OR NEW.champion_id = own_opp THEN
     RAISE EXCEPTION 'comp champion % duplicates the build''s own champion or lane opponent',
       NEW.champion_id USING ERRCODE = 'check_violation';
