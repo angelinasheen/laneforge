@@ -1,0 +1,10 @@
+[project]
+name = "laneforge"
+version = "0.1.0"
+description = "League of Legends core-build recommender keyed on lane matchup (COMS W4111 Project 1)"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
