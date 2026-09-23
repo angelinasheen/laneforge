@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Cannot answer that · LaneForge{% endblock %}
+{% block content %}
+<section class="narrow error-page">
+  <p class="kicker">Error <span class="num">400</span></p>
+  <h1 class="headline">That request can’t be answered.</h1>
+  <p class="reason">{{ message or 'Some of the form input was missing or not valid.' }}</p>
+  <p><a href="/">Back to the matchup form</a></p>
+</section>
+{% endblock %}

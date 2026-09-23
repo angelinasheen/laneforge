@@ -1,0 +1,25 @@
+{#- The trust line. Included by matchup.html (full render) and by
+    partials/core.html as an out-of-band swap when fetched by htmx. -#}
+{%- set levels = [
+  ('matchup', 'sequence', 'vs ' ~ opponent.name ~ ', in order'),
+  ('matchup', 'item', 'vs ' ~ opponent.name ~ ', item by item'),
+  ('champion', 'sequence', 'all opponents, in order'),
+  ('champion', 'item', 'all opponents, item by item'),
+] %}
+<div id="answered" class="answered-wrap" aria-live="polite"{% if oob %} hx-swap-oob="innerHTML"{% endif %}>
+  <p class="answered">
+    <span class="lvl">answered at level {{ ladder.level }}</span>
+    <span class="at">{{ 'matchup' if ladder.scope == 'matchup' else 'all opponents' }} · {{ 'ordered sequence' if ladder.granularity == 'sequence' else 'per item' }} · <span class="num">{{ ladder.sample_size|num }}</span> games</span>
+  </p>
+  {%- if ladder.fell_back and ladder.fallback_note %}
+  <p class="fallback">{{ ladder.fallback_note }}.</p>
+  {%- endif %}
+  <ol class="ladder" aria-label="Answer levels, most specific first">
+    {%- for scope, gran, text in levels %}
+    {%- set n = loop.index %}
+    <li class="{% if n == ladder.level %}is-answer{% elif n < ladder.level %}is-skipped{% endif %}"{% if n == ladder.level %} aria-current="step"{% endif %}>
+      <span class="n">{{ n }}</span> {{ text }}{% if n < ladder.level %}<span class="visually-hidden"> (too few games)</span>{% endif %}
+    </li>
+    {%- endfor %}
+  </ol>
+</div>

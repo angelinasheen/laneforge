@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m %}
+{% block title %}{{ item.name }} · LaneForge{% endblock %}
+{% block content %}
+<article class="dossier">
+  <header class="dossier-head">
+    <p class="kicker">Item <span class="num">{{ item.item_id }}</span>{% if item.is_legendary and not item.is_boots %} · legendary{% elif item.is_boots %} · boots{% endif %}</p>
+    <div class="headline-row">
+      <span class="portraits" aria-hidden="true">{{ m.item_icon(item, 64, false) }}</span>
+      <h1 class="headline">{{ item.name }}</h1>
+    </div>
+    <p class="summary-line"><span class="num">{{ item.gold_cost|gold }}</span> gold · {{ m.stat_line(item) }}</p>
+  </header>
+
+  <section class="block" aria-labelledby="use-h">
+    <h2 id="use-h" class="runin">Who finishes it early</h2>
+    {%- if usage %}
+    <div class="table-scroll">
+    <table class="ledger">
+      <thead><tr><th scope="col">Champion</th><th scope="col">Role</th><th scope="col" class="n">Games with it in the first three</th><th scope="col" class="n">Won</th></tr></thead>
+      <tbody>
+      {%- for u in usage %}
+        <tr>
+          <th scope="row"><a class="with-icon" href="/champions/{{ u.champion.champion_id }}">{{ m.champ_icon(u.champion, 24, false, '') }}{{ u.champion.name }}</a></th>
+          <td>{{ u.role|role_label }}</td>
+          <td class="n num{% if u.games < 30 %} mute{% endif %}">{{ u.games|num }}</td>
+          <td class="n">{{ m.wr(u.win_rate, u.games >= 30) }}</td>
+        </tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+    {%- elif item.is_legendary and not item.is_boots %}
+    <p class="empty">No player in the loaded matches finished {{ item.name }} among their first three legendaries.</p>
+    {%- else %}
+    <p class="empty">Only legendary items count toward a core build, so {{ item.name }} has no core-build usage.</p>
+    {%- endif %}
+  </section>
+</article>
+{% endblock %}

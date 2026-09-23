@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m %}
+{% block title %}Saved builds · LaneForge{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1 class="headline">Saved builds</h1>
+  {%- if current_user %}<p class="lede-small">Filed under <strong>{{ current_user.display_name }}</strong>. <span class="tag">OBSERVED</span> builds were saved exactly as players built them; <span class="tag tag-ox">CUSTOMIZED</span> builds have been edited since.</p>{% endif %}
+</header>
+{%- if builds %}
+<ol class="entries">
+  {%- for b in builds %}
+  <li class="entry">
+    <p class="entry-meta"><span class="num">No. {{ '%03d'|format(b.build_id) }}</span> · <span class="num">{{ b.created_at.strftime('%d %b %Y') }}</span>
+      {% if b.is_customized %}<span class="tag tag-ox">CUSTOMIZED</span>{% else %}<span class="tag">OBSERVED</span>{% endif %}</p>
+    <h2 class="entry-title"><a href="/builds/{{ b.build_id }}">{{ b.name }}</a></h2>
+    <p class="entry-matchup">{{ b.champion.name }} · {{ b.role|role_label }} · vs {{ b.opponent.name }}{% if b.enemies %} <span class="ink-2">with {{ b.enemies|map(attribute='name')|join(', ') }}</span>{% endif %}</p>
+    <ol class="strip compact" aria-label="Items in order">
+      {%- for it in b.items %}<li>{{ m.item_icon(it, 32, false) }}<span class="iname">{{ it.name }}</span></li>{% endfor %}
+    </ol>
+    {%- if b.notes %}<p class="entry-notes">{{ b.notes }}</p>{% endif %}
+  </li>
+  {%- endfor %}
+</ol>
+{%- else %}
+<p class="empty">Nothing saved yet. Compile a <a href="/">matchup dossier</a> and use “Save this build” on any row.</p>
+{%- endif %}
+{% endblock %}

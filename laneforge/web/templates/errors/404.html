@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Not found · LaneForge{% endblock %}
+{% block content %}
+<section class="narrow error-page">
+  <p class="kicker">Error <span class="num">404</span></p>
+  <h1 class="headline">No such file.</h1>
+  <p>{{ message or 'There is nothing at this address. The champion, item, match or build may not exist, or it was deleted.' }}</p>
+  <p><a href="/">Start a new dossier</a> · <a href="/champions">Browse champions</a></p>
+</section>
+{% endblock %}

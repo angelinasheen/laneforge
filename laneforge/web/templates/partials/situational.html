@@ -1,0 +1,84 @@
+{% import '_macros.html' as m %}
+{%- set p = situational.profile %}
+{%- macro meter(label, value, p75, fmt) -%}
+  {%- set top = [value, p75 or 0]|max * 1.4 or 1 %}
+  {%- set above = p75 is not none and value > p75 %}
+  <div class="meter-row">
+    <span class="meter-label">{{ label }}</span>
+    <span class="num meter-val">{{ fmt(value) }}<span class="unit">/min</span></span>
+    <span class="meter" role="img" aria-label="{{ label }} {{ fmt(value) }} per minute{% if p75 is not none %}, 75th percentile of comps {{ fmt(p75) }}{% endif %}"
+          style="--v:{{ '%.4f'|format(value / top) }}{% if p75 is not none %};--p75:{{ '%.4f'|format(p75 / top) }}{% endif %}">
+      <span class="meter-fill{% if above %} hot{% endif %}"></span>{% if p75 is not none %}<span class="meter-p75"></span>{% endif %}
+    </span>
+    <span class="meter-note">
+      {%- if p75 is none %}<span class="mute">no reference percentile</span>
+      {%- elif above %}<span class="flag">above 75th pct</span> <span class="mute num">p75 {{ fmt(p75) }}</span>
+      {%- else %}<span class="mute num">p75 {{ fmt(p75) }}</span>{% endif -%}
+    </span>
+  </div>
+{%- endmacro %}
+{%- macro whole(v) %}{{ v|num }}{% endmacro %}
+{%- macro tenths(v) %}{{ '%.1f'|format(v) }}{% endmacro %}
+
+<div class="situational" id="situational-body">
+  <div class="comp">
+    <h3 class="minor">Enemy damage split</h3>
+    {%- set shares = [('physical', p.physical_share), ('magic', p.magic_share), ('true', p.true_share)] %}
+    {%- set dominant = (shares|sort(attribute='1', reverse=true)|first)[0] %}
+    <div class="stack" role="img" aria-label="physical {{ p.physical_share|pct }}, magic {{ p.magic_share|pct }}, true {{ p.true_share|pct }}">
+      {%- for name, share in shares if share > 0 %}
+      <span class="seg seg-{{ name }}{% if name == dominant %} dom{% endif %}" style="flex-basis:{{ '%.2f'|format(share * 100) }}%"></span>
+      {%- endfor %}
+    </div>
+    <p class="stack-legend">
+      {%- for name, share in shares %}
+      <span class="key key-{{ name }}{% if name == dominant %} dom{% endif %}"><span class="swatch" aria-hidden="true"></span>{{ name }} <span class="num">{{ share|pct }}</span></span>
+      {%- endfor %}
+    </p>
+    {{ meter('healing', p.healing_pm, p.healing_pm_p75, whole) }}
+    {{ meter('crowd control', p.cc_pm, p.cc_pm_p75, tenths) }}
+    {%- if p.partial %}
+    <p class="partial-note">The comp profile is partial: {{ enemies|length }} of 4 other enemies given, so it leans on {{ opponent.name }}.</p>
+    {%- endif %}
+    <ul class="members" aria-label="Who the profile is built from">
+      {%- for mem in p.members %}
+      <li{% if mem.source == 'none' %} class="mute"{% endif %}>{{ m.champ_icon(mem.champion, 20, false, '') }}{{ mem.champion.name }}
+        <span class="src">{% if mem.source == 'role' %}as {{ mem.role|role_label }}{% elif mem.source == 'champion' %}all roles{% else %}no games, not counted{% endif %}</span></li>
+      {%- endfor %}
+    </ul>
+  </div>
+
+  <div class="rules">
+  {%- for rule in situational.triggered %}
+    <section class="rule" aria-labelledby="rule-{{ rule.key }}">
+      <p class="rule-head"><strong id="rule-{{ rule.key }}" class="runin-minor">{{ rule.item_class|capitalize }}.</strong> The {{ rule.reason }}.
+      {%- set ce = situational.class_evidence.get(rule.key) %}
+      {%- if ce %} In <span class="num">{{ ce.games|num }}</span> games where {{ champion.name }} faced {{ ce.condition_text }}, players who completed any {{ rule.item_class }} item won <span class="num">{{ ce.win_rate|pct1 }}</span>.{% endif %}</p>
+      <ol class="suggestions">
+        {%- for s in situational.suggestions if s.rule.key == rule.key %}
+        <li class="sugg">
+          <a class="sugg-item" href="/items/{{ s.item.item_id }}">{{ m.item_icon(s.item, 36, false) }}<span class="sugg-name">{{ s.item.name }}</span></a>
+          <span class="sugg-rule">{{ rule.item_class }}</span>
+          <span class="sugg-score num" title="stat-model score {{ '%.2f'|format(s.score) }}">{{ s.score_text }}</span>
+          <span class="sugg-ev">
+            {%- if s.evidence %}{{ m.wr(s.evidence.win_rate) }} {{ m.ci_bar(s.evidence.win_rate, s.evidence.ci_low, s.evidence.ci_high) }}
+            {%- else %}<span class="insufficient">no sample</span>{% endif -%}
+          </span>
+          <p class="sugg-line">
+            {%- if s.evidence -%}
+            In <span class="num">{{ s.evidence.games|num }}</span> games where {{ champion.name }} faced {{ s.evidence.condition_text }}, players who completed {{ s.item.name }} won <span class="num">{{ s.evidence.win_rate|pct1 }}</span> <span class="num mute">({{ (s.evidence.ci_low * 100)|round|int }}–{{ (s.evidence.ci_high * 100)|round|int }})</span>.
+            {%- else -%}
+            <span class="mute-ink">stat model only, no sample</span>: {{ champion.name }} finished it in fewer than 30 such games.
+            {%- endif -%}
+          </p>
+        </li>
+        {%- else %}
+        <li class="empty">No purchasable item in the catalogue matches this class.</li>
+        {%- endfor %}
+      </ol>
+    </section>
+  {%- else %}
+    <p class="empty">No rule triggered. The comp splits its damage, and its healing and crowd control sit at or under the 75th percentile of comps, so nothing here outranks the core build.</p>
+  {%- endfor %}
+  </div>
+</div>

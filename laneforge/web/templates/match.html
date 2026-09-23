@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m %}
+{% block title %}{{ match.match_id }} · LaneForge{% endblock %}
+{% block content %}
+{%- set teams = match.participants|map(attribute='team')|unique|sort|list %}
+<article class="dossier">
+  <header class="dossier-head">
+    <p class="kicker">Match <span class="num">{{ match.match_id }}</span> · {{ match.seed_tier|title }} · version <span class="num">{{ match.game_version }}</span></p>
+    <h1 class="headline">{{ match.start_time.strftime('%d %B %Y, %H:%M') }}</h1>
+    <p class="summary-line"><span class="num">{{ (match.duration_seconds * 1000)|mmss }}</span> game · {{ 'Blue' if match.winning_team == teams[0] else 'Red' }} side won</p>
+  </header>
+
+  <div class="teamsheet">
+  {%- for team in teams %}
+    {%- set won = team == match.winning_team %}
+    <section class="team team-{{ 'blue' if loop.first else 'red' }}" aria-labelledby="team-{{ team }}">
+      <h2 id="team-{{ team }}" class="runin">{{ 'Blue side' if loop.first else 'Red side' }}{% if won %} <span class="dagger" title="winner">†</span><span class="visually-hidden"> (won)</span>{% endif %}</h2>
+      <ol class="players">
+      {%- for p in match.participants if p.team == team %}
+        <li class="player">
+          <div class="player-head">
+            <a href="/champions/{{ p.champion.champion_id }}">{{ m.champ_icon(p.champion, 40, false, '') }}</a>
+            <div>
+              <p class="pname"><a href="/champions/{{ p.champion.champion_id }}">{{ p.champion.name }}</a> <span class="prole">{{ p.role|role_label }}</span></p>
+              <p class="pstats num"><span title="physical damage to champions">{{ p.physical_damage|num }} phys</span> · <span title="magic damage to champions">{{ p.magic_damage|num }} magic</span> · <span title="true damage to champions">{{ p.true_damage|num }} true</span> · {{ p.healing_done|num }} heal · {{ p.cc_seconds|num }}s cc</p>
+            </div>
+          </div>
+          {%- if p.purchases %}
+          <ol class="timeline" aria-label="{{ p.champion.name }} purchases in order">
+            {%- for pu in p.purchases %}
+            <li{% if pu.item.is_legendary and not pu.item.is_boots %} class="leg"{% endif %}>{{ m.item_icon(pu.item, 24) }}<span class="t num">{{ pu.game_time_ms|mmss }}</span></li>
+            {%- endfor %}
+          </ol>
+          {%- else %}
+          <p class="mute-ink small">No purchases recorded.</p>
+          {%- endif %}
+        </li>
+      {%- endfor %}
+      </ol>
+    </section>
+  {%- endfor %}
+  </div>
+  <p class="footnote">Timelines list every completed purchase after undos were replayed; legendary completions are underlined. Minute marks are game time.</p>
+</article>
+{% endblock %}

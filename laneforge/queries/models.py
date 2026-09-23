@@ -262,3 +262,25 @@ class ChampionOverview:
     win_rate: float
     by_role: tuple[RoleStats, ...]
     top_matchups: tuple[MatchupStat, ...]   # most-played lane opponents, up to 8
+
+
+# --- item usage (added by the query agent for /items/<id>) -------------------
+
+@dataclass(frozen=True)
+class ItemChampionUse:
+    champion: ChampionRef
+    role: str
+    games: int                   # full-core participants whose first three include the item
+    wins: int
+    win_rate: float
+
+
+@dataclass(frozen=True)
+class ItemUsage:
+    item: ItemRef
+    completions: int             # purchase events for this item (all participants)
+    core_games: int              # full-core participants whose first three include it
+    core_wins: int
+    core_win_rate: float
+    saved_builds: int            # saved builds that contain it
+    top_champions: tuple[ItemChampionUse, ...]   # up to 10, by games desc

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m %}
+{% block title %}Champions · LaneForge{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1 class="headline">Champions</h1>
+  <p class="filter">
+    <label for="champ-filter">Find</label>
+    <input id="champ-filter" type="search" autocomplete="off" spellcheck="false" placeholder="type a name" aria-controls="champ-grid">
+    <span class="num mute" id="champ-count" aria-live="polite">{{ champions|length }} champions</span>
+  </p>
+</header>
+{%- if champions %}
+<ul class="champ-grid" id="champ-grid">
+  {%- for c in champions %}
+  <li data-name="{{ c.name|lower }}"><a href="/champions/{{ c.champion_id }}">{{ m.champ_icon(c, 64, loop.index > 40, '') }}<span>{{ c.name }}</span></a></li>
+  {%- endfor %}
+</ul>
+<p class="empty" id="champ-none" hidden>No champion by that name.</p>
+<script>
+(function () {
+  var input = document.getElementById('champ-filter');
+  var items = document.querySelectorAll('#champ-grid li');
+  var count = document.getElementById('champ-count');
+  var none = document.getElementById('champ-none');
+  input.addEventListener('input', function () {
+    var q = input.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    var shown = 0;
+    items.forEach(function (li) {
+      var hit = li.dataset.name.replace(/[^a-z0-9]/g, '').indexOf(q) !== -1;
+      li.hidden = !hit;
+      if (hit) shown += 1;
+    });
+    count.textContent = shown + (shown === 1 ? ' champion' : ' champions');
+    none.hidden = shown !== 0;
+  });
+})();
+</script>
+{%- else %}
+<p class="empty">The champion catalogue is empty. Run <code>python -m laneforge.ingest ddragon</code>.</p>
+{%- endif %}
+{% endblock %}

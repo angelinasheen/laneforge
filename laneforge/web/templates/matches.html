@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m %}
+{% block title %}Matches · LaneForge{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1 class="headline">Matches</h1>
+  <p class="lede-small">The most recent ranked solo games in the dataset. <span class="dagger" aria-hidden="true">†</span> marks the winning side.</p>
+</header>
+{%- if matches %}
+<div class="table-scroll">
+<table class="ledger matchlist">
+  <thead><tr>
+    <th scope="col">Match</th><th scope="col">Played</th><th scope="col" class="n">Length</th><th scope="col">Tier</th>
+    <th scope="col">Blue side</th><th scope="col">Red side</th>
+  </tr></thead>
+  <tbody>
+  {%- for mt in matches %}
+    {%- set blue_won = mt.winning_team == 100 %}
+    <tr>
+      <th scope="row"><a class="num" href="/matches/{{ mt.match_id }}">{{ mt.match_id }}</a></th>
+      <td class="num">{{ mt.start_time.strftime('%d %b %H:%M') }}</td>
+      <td class="n num">{{ (mt.duration_seconds * 1000)|mmss }}</td>
+      <td>{{ mt.seed_tier|title }}</td>
+      {%- for side, roster, won in [('Blue', mt.blue, blue_won), ('Red', mt.red, not blue_won)] %}
+      <td class="roster{% if won %} won{% endif %}">
+        <span class="visually-hidden">{{ side }}{% if won %}, won{% endif %}: {{ roster|map(attribute='name')|join(', ') }}</span>
+        <span class="icons" aria-hidden="true">{% for c in roster %}{{ m.champ_icon(c, 28, true, c.name) }}{% endfor %}</span>
+        {%- if won %}<span class="dagger" aria-hidden="true">†</span>{% endif %}
+      </td>
+      {%- endfor %}
+    </tr>
+  {%- endfor %}
+  </tbody>
+</table>
+</div>
+{%- else %}
+<p class="empty">No matches loaded. Run <code>python -m laneforge.ingest load</code>.</p>
+{%- endif %}
+{% endblock %}

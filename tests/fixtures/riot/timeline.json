@@ -1,0 +1,474 @@
+{
+ "metadata": {
+  "dataVersion": "2",
+  "matchId": "NA1_5100000001",
+  "participants": [
+   "puuid-01-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-02-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-03-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-04-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-05-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-06-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-07-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-08-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-09-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "puuid-10-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ]
+ },
+ "info": {
+  "endOfGameResult": "GameComplete",
+  "frameInterval": 60000,
+  "frames": [
+   {
+    "events": [
+     {
+      "realTimestamp": 1789646400000,
+      "timestamp": 0,
+      "type": "PAUSE_END"
+     },
+     {
+      "itemId": 3865,
+      "participantId": 0,
+      "timestamp": 0,
+      "type": "ITEM_PURCHASED"
+     },
+     {
+      "itemId": 3340,
+      "participantId": 5,
+      "timestamp": 1000,
+      "type": "ITEM_PURCHASED"
+     },
+     {
+      "itemId": 1055,
+      "participantId": 4,
+      "timestamp": 15000,
+      "type": "ITEM_PURCHASED"
+     },
+     {
+      "itemId": 2003,
+      "participantId": 4,
+      "timestamp": 15500,
+      "type": "ITEM_PURCHASED"
+     },
+     {
+      "itemId": 1055,
+      "participantId": 9,
+      "timestamp": 16000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 0
+   },
+   {
+    "events": [
+     {
+      "timestamp": 62000,
+      "type": "SKILL_LEVEL_UP",
+      "participantId": 4,
+      "skillSlot": 1,
+      "levelUpType": "NORMAL"
+     },
+     {
+      "timestamp": 95000,
+      "type": "WARD_PLACED",
+      "creatorId": 5,
+      "wardType": "YELLOW_TRINKET"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 60000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 120000
+   },
+   {
+    "events": [
+     {
+      "itemId": 2003,
+      "participantId": 4,
+      "timestamp": 180000,
+      "type": "ITEM_DESTROYED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 180000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 240000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 300000
+   },
+   {
+    "events": [
+     {
+      "timestamp": 400000,
+      "type": "CHAMPION_KILL",
+      "killerId": 8,
+      "victimId": 3,
+      "assistingParticipantIds": [
+       7
+      ],
+      "bounty": 300,
+      "position": {
+       "x": 7200,
+       "y": 7400
+      },
+      "shutdownBounty": 0
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 360000
+   },
+   {
+    "events": [
+     {
+      "itemId": 1001,
+      "participantId": 4,
+      "timestamp": 420000,
+      "type": "ITEM_PURCHASED"
+     },
+     {
+      "itemId": 1042,
+      "participantId": 4,
+      "timestamp": 420300,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 420000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 480000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 540000
+   },
+   {
+    "events": [
+     {
+      "itemId": 1038,
+      "participantId": 4,
+      "timestamp": 600000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 600000
+   },
+   {
+    "events": [
+     {
+      "itemId": 3004,
+      "participantId": 9,
+      "timestamp": 700000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 660000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 720000
+   },
+   {
+    "events": [
+     {
+      "itemId": 1037,
+      "participantId": 4,
+      "timestamp": 780000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 780000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 840000
+   },
+   {
+    "events": [
+     {
+      "itemId": 1038,
+      "participantId": 4,
+      "timestamp": 900000,
+      "type": "ITEM_DESTROYED"
+     },
+     {
+      "itemId": 1037,
+      "participantId": 4,
+      "timestamp": 900000,
+      "type": "ITEM_DESTROYED"
+     },
+     {
+      "itemId": 3031,
+      "participantId": 4,
+      "timestamp": 900000,
+      "type": "ITEM_PURCHASED"
+     },
+     {
+      "afterId": 0,
+      "beforeId": 3031,
+      "goldGain": 725,
+      "participantId": 4,
+      "timestamp": 905000,
+      "type": "ITEM_UNDO"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 900000
+   },
+   {
+    "events": [
+     {
+      "itemId": 1038,
+      "participantId": 4,
+      "timestamp": 960000,
+      "type": "ITEM_DESTROYED"
+     },
+     {
+      "itemId": 1037,
+      "participantId": 4,
+      "timestamp": 960000,
+      "type": "ITEM_DESTROYED"
+     },
+     {
+      "itemId": 3031,
+      "participantId": 4,
+      "timestamp": 960000,
+      "type": "ITEM_PURCHASED"
+     },
+     {
+      "itemId": 1001,
+      "participantId": 4,
+      "timestamp": 1000000,
+      "type": "ITEM_DESTROYED"
+     },
+     {
+      "itemId": 1042,
+      "participantId": 4,
+      "timestamp": 1000000,
+      "type": "ITEM_DESTROYED"
+     },
+     {
+      "itemId": 3006,
+      "participantId": 4,
+      "timestamp": 1000000,
+      "type": "ITEM_PURCHASED"
+     },
+     {
+      "itemId": 3071,
+      "participantId": 1,
+      "timestamp": 1000000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 960000
+   },
+   {
+    "events": [
+     {
+      "itemId": 3071,
+      "participantId": 6,
+      "timestamp": 1050000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 1020000
+   },
+   {
+    "events": [
+     {
+      "itemId": 3031,
+      "participantId": 9,
+      "timestamp": 1100000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 1080000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 1140000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 1200000
+   },
+   {
+    "events": [
+     {
+      "itemId": 6672,
+      "participantId": 4,
+      "timestamp": 1300000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 1260000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 1320000
+   },
+   {
+    "events": [
+     {
+      "itemId": 1055,
+      "participantId": 4,
+      "timestamp": 1400000,
+      "type": "ITEM_SOLD"
+     },
+     {
+      "afterId": 1055,
+      "beforeId": 0,
+      "goldGain": -330,
+      "participantId": 4,
+      "timestamp": 1405000,
+      "type": "ITEM_UNDO"
+     },
+     {
+      "itemId": 1055,
+      "participantId": 4,
+      "timestamp": 1410000,
+      "type": "ITEM_SOLD"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 1380000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 1440000
+   },
+   {
+    "events": [
+     {
+      "itemId": 3004,
+      "participantId": 9,
+      "timestamp": 1500000,
+      "type": "ITEM_DESTROYED"
+     },
+     {
+      "itemId": 3042,
+      "participantId": 9,
+      "timestamp": 1500000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 1500000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 1560000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 1620000
+   },
+   {
+    "events": [
+     {
+      "itemId": 3072,
+      "participantId": 4,
+      "timestamp": 1700000,
+      "type": "ITEM_PURCHASED"
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 1680000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 1740000
+   },
+   {
+    "events": [],
+    "participantFrames": {},
+    "timestamp": 1800000
+   },
+   {
+    "events": [
+     {
+      "gameId": 5100000001,
+      "realTimestamp": 1789648250000,
+      "timestamp": 1850000,
+      "type": "GAME_END",
+      "winningTeam": 200
+     }
+    ],
+    "participantFrames": {},
+    "timestamp": 1860000
+   }
+  ],
+  "gameId": 5100000001,
+  "participants": [
+   {
+    "participantId": 1,
+    "puuid": "puuid-01-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 2,
+    "puuid": "puuid-02-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 3,
+    "puuid": "puuid-03-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 4,
+    "puuid": "puuid-04-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 5,
+    "puuid": "puuid-05-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 6,
+    "puuid": "puuid-06-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 7,
+    "puuid": "puuid-07-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 8,
+    "puuid": "puuid-08-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 9,
+    "puuid": "puuid-09-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   {
+    "participantId": 10,
+    "puuid": "puuid-10-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   }
+  ]
+ }
+}

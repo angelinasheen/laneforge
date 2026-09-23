@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Compile a matchup dossier · LaneForge{% endblock %}
+{% block content %}
+{%- set args = request.args %}
+{%- set chosen_enemies = args.getlist('enemy') %}
+{%- macro champ_options(selected, blank=none) -%}
+  {%- if blank is not none %}<option value="">{{ blank }}</option>{% endif %}
+  {%- for c in champions %}
+  <option value="{{ c.champion_id }}"{% if selected == c.champion_id|string %} selected{% endif %}>{{ c.name }}</option>
+  {%- endfor %}
+{%- endmacro %}
+
+<section class="brief" aria-labelledby="brief-h">
+  <h1 id="brief-h" class="kicker">New dossier</h1>
+
+  {%- if not dataset or not dataset.matches %}
+  <p class="lede">No matches are loaded yet, so there is nothing to answer from.</p>
+  <p>Load a crawl with <code>python -m laneforge.ingest load</code>, then refresh the views with <code>python -m laneforge.ingest refresh</code>. The form appears once the dataset has at least one match.</p>
+  {%- elif not champions %}
+  <p class="lede">The champion catalogue is empty. Run <code>python -m laneforge.ingest ddragon</code> first.</p>
+  {%- else %}
+  <form class="sentence" method="get" action="/matchup">
+    <p>
+      <label for="f-champion">I play</label>
+      <select id="f-champion" name="champion" required>
+        {{ champ_options(args.get('champion', ''), 'champion') }}
+      </select>
+      <label for="f-role">in</label>
+      <select id="f-role" name="role" required>
+        <option value="">role</option>
+        {%- for r in roles %}
+        <option value="{{ r }}"{% if args.get('role') == r %} selected{% endif %}>{{ r|role_label }}</option>
+        {%- endfor %}
+      </select>
+      <label for="f-opponent">against</label>
+      <select id="f-opponent" name="opponent" required>
+        {{ champ_options(args.get('opponent', ''), 'lane opponent') }}
+      </select>
+      <span id="f-enemies" class="joiner">with enemies</span>
+      {%- for i in range(4) %}
+      <span class="visually-hidden" id="f-enemy-{{ i }}-n">{{ i + 1 }} of 4, optional</span>
+      <select name="enemy" class="enemy" aria-labelledby="f-enemies f-enemy-{{ i }}-n">
+        {{ champ_options(chosen_enemies[i] if chosen_enemies|length > i else '', '—') }}
+      </select>
+      {%- endfor %}
+    </p>
+    <p class="actions"><button type="submit" class="primary">Compile dossier</button></p>
+  </form>
+  {%- endif %}
+</section>
+
+<section class="method" aria-labelledby="method-h">
+  <h2 id="method-h" class="runin">How the dossier answers</h2>
+  <p>Core builds come from the first three legendary items each player finished, in order. The dossier answers at the most specific level whose leading build has at least 30 games, and says which level that was: your exact matchup first, then the matchup item by item, then your champion and role against every opponent. Rows are ranked by how often they were built, not by win rate; at these sample sizes a win-rate ranking would be noise, so win rate is shown with its 95% interval instead.</p>
+  <p>The situational block reads the enemy composition’s damage split, healing and crowd control. When one of those crosses a threshold it names an item class, orders the candidates by a flat-stat model, and adds a line from real games whenever your champion finished that item in at least 30 of them.</p>
+</section>
+
+{%- if dataset and dataset.matches %}
+<section class="colophon-table" aria-labelledby="ds-h">
+  <h2 id="ds-h" class="runin">Dataset</h2>
+  <dl class="facts">
+    <div><dt>Patch</dt><dd class="num">{{ dataset.patch }}</dd></div>
+    <div><dt>Region</dt><dd>{{ dataset.region }}</dd></div>
+    <div><dt>Tiers</dt><dd>{{ dataset.tiers|map('title')|join(', ') or '—' }}</dd></div>
+    <div><dt>Matches</dt><dd class="num">{{ dataset.matches|num }}</dd></div>
+    <div><dt>Players</dt><dd class="num">{{ dataset.participants|num }}</dd></div>
+    {%- if dataset.first_start and dataset.last_start %}
+    <div><dt>Played</dt><dd class="num">{{ dataset.first_start.strftime('%d %b') }} – {{ dataset.last_start.strftime('%d %b %Y') }}</dd></div>
+    {%- endif %}
+  </dl>
+</section>
+{%- endif %}
+{% endblock %}

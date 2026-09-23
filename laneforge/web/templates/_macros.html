@@ -1,0 +1,60 @@
+{#- Shared fragments. Imported with `{% import '_macros.html' as m %}`. -#}
+
+{%- set STAT_FIELDS = [
+  ('ability_power', 'AP', false), ('attack_damage', 'AD', false),
+  ('health', 'health', false), ('mana', 'mana', false),
+  ('armor', 'armor', false), ('magic_resist', 'magic resist', false),
+  ('ability_haste', 'haste', false), ('attack_speed_pct', 'attack speed', true),
+  ('crit_chance_pct', 'crit', true), ('life_steal_pct', 'life steal', true),
+  ('lethality', 'lethality', false), ('armor_pen_pct', 'armor pen', true),
+  ('magic_pen_flat', 'magic pen', false), ('magic_pen_pct', 'magic pen', true),
+  ('tenacity_pct', 'tenacity', true), ('move_speed', 'move speed', false),
+] -%}
+
+{% macro item_icon(item, size=36, lazy=true) -%}
+<img class="icon" src="{{ item_img(item) }}" alt="{{ item.name }}" width="{{ size }}" height="{{ size }}"{% if lazy %} loading="lazy"{% endif %}>
+{%- endmacro %}
+
+{% macro champ_icon(champion, size=36, lazy=true, alt=none) -%}
+<img class="icon champ" src="{{ champion_img(champion) }}" alt="{{ champion.name if alt is none else alt }}" width="{{ size }}" height="{{ size }}"{% if lazy %} loading="lazy"{% endif %}>
+{%- endmacro %}
+
+{#- Win-rate interval drawn as ├──●──┤ on a 30%..70% scale with a 50% tick. -#}
+{% macro ci_bar(win_rate, lo, hi) -%}
+<span class="ci" style="--lo:{{ '%.4f'|format(lo) }};--hi:{{ '%.4f'|format(hi) }};--p:{{ '%.4f'|format(win_rate) }}" role="img"
+  aria-label="win rate {{ win_rate|pct1 }}, 95% interval {{ lo|pct1 }} to {{ hi|pct1 }}"><span class="ci-range"></span><span class="ci-dot"></span></span>
+{%- endmacro %}
+
+{% macro stat_parts(source, is_mapping=false) -%}
+  {%- set parts = [] -%}
+  {%- for key, label, is_pct in STAT_FIELDS -%}
+    {%- set v = source.get(key, 0) if is_mapping else source[key] -%}
+    {%- if v -%}
+      {%- if is_pct -%}{%- set _ = parts.append('%d%% %s'|format((v * 100)|round|int, label)) -%}
+      {%- else -%}{%- set _ = parts.append('%s %s'|format(v|num, label)) -%}{%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if not is_mapping and source.applies_grievous_wounds -%}{%- set _ = parts.append('grievous wounds') -%}{%- endif -%}
+  {{- parts|join(' · ') -}}
+{%- endmacro %}
+
+{% macro stat_line(item) -%}
+<span class="statline">{{ stat_parts(item) or 'no flat stats' }}</span>
+{%- endmacro %}
+
+{#- Rows of (label, value) for a stat_totals mapping; zero stats are skipped. -#}
+{% macro stat_rows(totals) -%}
+  {%- for key, label, is_pct in STAT_FIELDS if totals.get(key) %}
+  <tr><th scope="row">{{ label }}</th><td class="num">{% if is_pct %}{{ totals[key]|pct }}{% else %}{{ totals[key]|num }}{% endif %}</td></tr>
+  {%- else %}
+  <tr><td colspan="2" class="mute">These three items carry no flat stats.</td></tr>
+  {%- endfor %}
+{%- endmacro %}
+
+{% macro matchup_href(champion, role, opponent) -%}
+/matchup?champion={{ champion.champion_id }}&amp;role={{ role }}&amp;opponent={{ opponent.champion_id }}
+{%- endmacro %}
+
+{% macro wr(value, sufficient=true) -%}
+<span class="num{% if not sufficient %} mute{% elif value > 0.5 %} up{% endif %}">{{ value|pct1 }}</span>
+{%- endmacro %}

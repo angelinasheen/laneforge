@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m %}
+{% block title %}{{ champion.name }} · LaneForge{% endblock %}
+{% block content %}
+{%- set o = overview %}
+<article class="dossier">
+  <header class="dossier-head">
+    <p class="kicker">Champion <span class="num">{{ champion.champion_id }}</span></p>
+    <div class="headline-row">
+      <span class="portraits" aria-hidden="true">{{ m.champ_icon(champion, 64, false, '') }}</span>
+      <h1 class="headline">{{ champion.name }}</h1>
+    </div>
+    {%- if o and o.games %}
+    <p class="summary-line"><span class="num">{{ o.games|num }}</span> games · won {{ m.wr(o.win_rate, o.games >= 30) }}</p>
+    {%- else %}
+    <p class="summary-line mute-ink">Not played in the loaded matches.</p>
+    {%- endif %}
+  </header>
+
+  {%- if o and o.by_role %}
+  <section class="block" aria-labelledby="roles-h">
+    <h2 id="roles-h" class="runin">By role</h2>
+    <div class="table-scroll">
+    <table class="ledger">
+      <thead><tr>
+        <th scope="col">Role</th><th scope="col" class="n">Games</th><th scope="col" class="n">Win rate</th>
+        <th scope="col" class="n">Physical</th><th scope="col" class="n">Magic</th><th scope="col" class="n">True</th>
+        <th scope="col" class="n">Healing</th><th scope="col" class="n">CC sec</th><th scope="col"><span class="visually-hidden">Open</span></th>
+      </tr></thead>
+      <tbody>
+      {%- for r in o.by_role %}
+        <tr>
+          <th scope="row">{{ r.role|role_label }}{% if r.profile_source != 'role' %}<sup class="mark">*</sup>{% endif %}</th>
+          <td class="n num{% if r.games < 30 %} mute{% endif %}">{{ r.games|num }}</td>
+          <td class="n">{{ m.wr(r.win_rate, r.games >= 30) }}</td>
+          {%- for v in [r.physical_pm, r.magic_pm, r.true_pm, r.healing_pm] %}
+          <td class="n num">{{ v|num if v is not none else '—' }}</td>
+          {%- endfor %}
+          <td class="n num">{{ '%.1f'|format(r.cc_pm) if r.cc_pm is not none else '—' }}</td>
+          <td><a href="/?champion={{ champion.champion_id }}&amp;role={{ r.role }}">Matchups</a></td>
+        </tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p class="footnote">Threat profile per minute of game time: damage dealt to champions by type, healing, and seconds of crowd control applied. {% if o.by_role|rejectattr('profile_source', 'equalto', 'role')|list %}<sup class="mark">*</sup> Too few games in this role for its own profile; the figures are the champion’s all-role mean.{% endif %}</p>
+  </section>
+  {%- endif %}
+
+  {%- if o and o.top_matchups %}
+  <section class="block" aria-labelledby="mu-h">
+    <h2 id="mu-h" class="runin">Most-played lane opponents</h2>
+    <div class="table-scroll">
+    <table class="ledger">
+      <thead><tr><th scope="col">Opponent</th><th scope="col">Role</th><th scope="col" class="n">Games</th><th scope="col" class="n">{{ champion.name }} won</th><th scope="col"><span class="visually-hidden">Dossier</span></th></tr></thead>
+      <tbody>
+      {%- for mu in o.top_matchups %}
+        <tr>
+          <th scope="row"><a class="with-icon" href="/champions/{{ mu.opponent.champion_id }}">{{ m.champ_icon(mu.opponent, 24, false, '') }}{{ mu.opponent.name }}</a></th>
+          <td>{{ mu.role|role_label }}</td>
+          <td class="n num{% if mu.games < 30 %} mute{% endif %}">{{ mu.games|num }}</td>
+          <td class="n">{{ m.wr(mu.win_rate, mu.games >= 30) }}</td>
+          <td><a href="{{ m.matchup_href(champion, mu.role, mu.opponent) }}">Dossier</a></td>
+        </tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+  {%- endif %}
+</article>
+{% endblock %}
