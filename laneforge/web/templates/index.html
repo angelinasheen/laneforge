@@ -19,8 +19,8 @@
   {%- elif not champions %}
   <p class="lede">The champion catalogue is empty. Run <code>python -m laneforge.ingest ddragon</code> first.</p>
   {%- else %}
-  <form class="sentence" method="get" action="/matchup">
-    <p>
+  <form class="sentence" method="get" action="/matchup" id="matchup-form">
+    <p class="sentence-main">
       <label for="f-champion">I play</label>
       <select id="f-champion" name="champion" required>
         {{ champ_options(args.get('champion', ''), 'champion') }}
@@ -36,16 +36,36 @@
       <select id="f-opponent" name="opponent" required>
         {{ champ_options(args.get('opponent', ''), 'lane opponent') }}
       </select>
-      <span id="f-enemies" class="joiner">with enemies</span>
+    </p>
+    <p class="sentence-enemies">
+      <span id="f-enemies" class="joiner">and they also have</span>
       {%- for i in range(4) %}
       <span class="visually-hidden" id="f-enemy-{{ i }}-n">{{ i + 1 }} of 4, optional</span>
       <select name="enemy" class="enemy" aria-labelledby="f-enemies f-enemy-{{ i }}-n">
-        {{ champ_options(chosen_enemies[i] if chosen_enemies|length > i else '', '—') }}
+        {{ champ_options(chosen_enemies[i] if chosen_enemies|length > i else '', 'anyone') }}
       </select>
       {%- endfor %}
+      <span class="joiner opt">(optional)</span>
     </p>
+    {%- if form_error %}
+    <p class="form-error" role="alert"><strong>Not compiled:</strong> {{ form_error }}</p>
+    {%- endif %}
     <p class="actions"><button type="submit" class="primary">Compile dossier</button></p>
   </form>
+  <script>
+  (function () {
+    var form = document.getElementById('matchup-form');
+    /* Style required selects as invalid only after a submit attempt. */
+    form.addEventListener('invalid', function () { form.classList.add('tried'); }, true);
+    /* Empty enemy selects stay out of the URL: no bare "enemy=". */
+    form.addEventListener('submit', function () {
+      form.querySelectorAll('select.enemy').forEach(function (s) { s.disabled = !s.value; });
+      window.setTimeout(function () {
+        form.querySelectorAll('select.enemy').forEach(function (s) { s.disabled = false; });
+      }, 0);
+    });
+  })();
+  </script>
   {%- endif %}
 </section>
 

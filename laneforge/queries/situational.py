@@ -2,16 +2,20 @@
 from __future__ import annotations
 
 from laneforge.queries import evidence as ev
+from laneforge.queries.champion_pool import ItemPool, item_pool
 from laneforge.queries._rows import item_from_row, load_champions, ITEM_COLUMNS
 from laneforge.queries.errors import ValidationError
 from laneforge.queries.models import (
-    ChampionRef, CompMember, CompProfile, Evidence, ItemRef, Rule, SituationalAnswer, Suggestion,
+    MIN_GAMES, ROLE_LABELS, ChampionRef, CompMember, CompProfile, ItemRef, Rule,
+    SituationalAnswer, Suggestion,
 )
 from laneforge.queries.rules import RULE_ORDER, item_matches, pen_rule, triggered_rules
 from laneforge.queries.statmodel import (
     MAGIC, PHYSICAL, defensive_score, penetration_score,
 )
-from laneforge.queries.validate import require_distinct_matchup, require_enemies, require_role
+from laneforge.queries.validate import (
+    UNKNOWN_CHAMPION_MESSAGE, require_distinct_matchup, require_enemies, require_role,
+)
 
 MAX_SUGGESTIONS_PER_RULE = 5
 PROFILE_FIELDS = ("physical_pm", "magic_pm", "true_pm", "healing_pm", "cc_pm")
@@ -100,7 +104,7 @@ def _resolve(conn, champion_ids: list[int]) -> dict[int, ChampionRef]:
     refs = load_champions(conn, champion_ids)
     missing = [i for i in champion_ids if i not in refs]
     if missing:
-        raise ValidationError(f"Unknown champion id {missing[0]}.")
+        raise ValidationError(UNKNOWN_CHAMPION_MESSAGE)
     return refs
 
 
@@ -147,22 +151,47 @@ def _score(rule: Rule, champion: ChampionRef, item: ItemRef, profile: CompProfil
     return score, "no flat defensive stats; its value is in the passive"
 
 
+def _ranking_key(s: Suggestion) -> tuple:
+    """Evidence-backed first, then stat-only; stat-model score orders each group."""
+    return (s.evidence is None, -s.score, s.item.name)
+
+
 def _suggestions_for(rule, candidates, champion, profile, opponent, kind, evidence_by_item):
     scored = []
     for item in candidates:
-        if not item_matches(rule.key, item, kind):
-            continue
         score, text = _score(rule, champion, item, profile, opponent, kind)
         scored.append(Suggestion(item=item, rule=rule, score=score, score_text=text,
                                  evidence=evidence_by_item.get(item.item_id)))
-    scored.sort(key=lambda s: (-s.score, s.item.name))
-    return tuple(scored[:MAX_SUGGESTIONS_PER_RULE])
+    return tuple(sorted(scored, key=_ranking_key)[:MAX_SUGGESTIONS_PER_RULE])
+
+
+def _rule_note(rule: Rule, suggestions: tuple[Suggestion, ...], champion: ChampionRef,
+               role: str) -> str | None:
+    if not suggestions:
+        return (f"{champion.name} never completed a {rule.item_class} item at "
+                f"{ROLE_LABELS[role].lower()} in this dataset.")
+    if all(s.evidence is None for s in suggestions):
+        return (f"None of these has {MIN_GAMES} {champion.name} games behind it; "
+                f"ordered by the stat model only.")
+    return None
 
 
 def _rules(profile: CompProfile, opponent: ChampionRef, kind: str) -> tuple[Rule, ...]:
     extra = pen_rule(opponent, kind)
     rules = triggered_rules(profile) + ((extra,) if extra else ())
     return tuple(sorted(rules, key=lambda r: RULE_ORDER.index(r.key)))
+
+
+def _candidates(conn, pool: ItemPool) -> tuple[ItemRef, ...]:
+    rows = conn.execute(SQL_SITUATIONAL_CANDIDATES).fetchall()
+    return tuple(i for i in (item_from_row(r) for r in rows) if pool.allows(i.item_id))
+
+
+def _rule_block(conn, rule: Rule, candidates, context: ev.EvidenceContext, kind: str):
+    matching = [i for i in candidates if item_matches(rule.key, i, kind)]
+    by_item = ev.item_evidence(conn, context, rule.key, [i.item_id for i in matching])
+    return _suggestions_for(rule, matching, context.champion, context.profile,
+                            context.opponent, kind, by_item)
 
 
 def situational_items(conn, champion_id: int, role: str, opponent_champion_id: int,
@@ -175,18 +204,22 @@ def situational_items(conn, champion_id: int, role: str, opponent_champion_id: i
     opponent = profile.members[0].champion
     kind = pen_kind(conn, champion_id, role)
     rules = _rules(profile, opponent, kind)
+    pool = item_pool(conn, champion_id, role)
+    thin = not pool.known
     if not rules:
-        return SituationalAnswer(profile=profile, triggered=(), suggestions=(), class_evidence={})
-    candidates = [item_from_row(r) for r in conn.execute(SQL_SITUATIONAL_CANDIDATES).fetchall()]
+        return SituationalAnswer(profile=profile, triggered=(), suggestions=(),
+                                 class_evidence={}, thin_sample=thin)
+    candidates = _candidates(conn, pool)
     context = ev.EvidenceContext(champion=champion, role=role, opponent=opponent,
                                  profile=profile, pen_kind=kind)
-    suggestions: list[Suggestion] = []
-    for rule in rules:
-        matching = [i.item_id for i in candidates if item_matches(rule.key, i, kind)]
-        by_item = ev.item_evidence(conn, context, rule.key, matching)
-        suggestions.extend(_suggestions_for(rule, candidates, champion, profile, opponent,
-                                            kind, by_item))
-    class_evidence: dict[str, Evidence] = ev.class_evidence(conn, context,
-                                                           tuple(r.key for r in rules))
-    return SituationalAnswer(profile=profile, triggered=rules, suggestions=tuple(suggestions),
-                             class_evidence=class_evidence)
+    blocks = {rule.key: _rule_block(conn, rule, candidates, context, kind) for rule in rules}
+    notes = {} if thin else {
+        rule.key: note for rule in rules
+        if (note := _rule_note(rule, blocks[rule.key], champion, role)) is not None
+    }
+    return SituationalAnswer(
+        profile=profile, triggered=rules,
+        suggestions=tuple(s for rule in rules for s in blocks[rule.key]),
+        class_evidence=ev.class_evidence(conn, context, tuple(r.key for r in rules)),
+        thin_sample=thin, rule_notes=notes,
+    )

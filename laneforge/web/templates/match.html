@@ -5,9 +5,8 @@
 {%- set teams = match.participants|map(attribute='team')|unique|sort|list %}
 <article class="dossier">
   <header class="dossier-head">
-    <p class="kicker">Match <span class="num">{{ match.match_id }}</span> · {{ match.seed_tier|title }} · version <span class="num">{{ match.game_version }}</span></p>
-    <h1 class="headline">{{ match.start_time.strftime('%d %B %Y, %H:%M') }}</h1>
-    <p class="summary-line"><span class="num">{{ (match.duration_seconds * 1000)|mmss }}</span> game · {{ 'Blue' if match.winning_team == teams[0] else 'Red' }} side won</p>
+    <p class="kicker">Match <span class="num">{{ match.match_id }}</span> · <span class="num">{{ match.start_time.strftime('%d %b %Y, %H:%M') }}</span> · {{ match.seed_tier|title }} · version <span class="num">{{ match.game_version }}</span></p>
+    <h1 class="headline">{{ 'Blue' if match.winning_team == teams[0] else 'Red' }} side won in <span class="num-display">{{ (match.duration_seconds * 1000)|mmss }}</span></h1>
   </header>
 
   <div class="teamsheet">
@@ -40,6 +39,6 @@
     </section>
   {%- endfor %}
   </div>
-  <p class="footnote">Timelines list every completed purchase after undos were replayed; legendary completions are underlined. Minute marks are game time.</p>
+  <p class="footnote">Every item finished, in order; legendaries have a red rule under them. Undone purchases were replayed away, and minute marks are game time.</p>
 </article>
 {% endblock %}

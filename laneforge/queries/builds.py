@@ -17,9 +17,10 @@ from dataclasses import dataclass
 from laneforge.queries._rows import load_champions, load_items, rate
 from laneforge.queries.errors import ValidationError
 from laneforge.queries.models import (
-    MAX_ROWS_PER_LEVEL, MIN_GAMES, ROLE_LABELS, ROLES, BuildRow, ChampionRef, LadderAnswer,
+    MAX_ROWS_PER_LEVEL, MIN_GAMES, ROLE_LABELS, ROLES, BuildRow, ChampionRef, ItemRef, LadderAnswer,
 )
 from laneforge.queries.stats import wilson_interval
+from laneforge.queries.validate import ROLE_MESSAGE, UNKNOWN_CHAMPION_MESSAGE
 
 FULL_CORE = 3
 
@@ -132,20 +133,22 @@ def _item_ids(row: dict, granularity: str) -> tuple[int, ...]:
     return (row["item_id"],)
 
 
+def build_row(items: tuple[ItemRef, ...], games: int, wins: int, sample_size: int) -> BuildRow:
+    """One ladder row: pick rate over the scope's full-core sample, Wilson interval."""
+    low, high = wilson_interval(wins, games)
+    return BuildRow(items=items, games=games, wins=wins, pick_rate=rate(games, sample_size),
+                    win_rate=rate(wins, games), ci_low=low, ci_high=high,
+                    sufficient=games >= MIN_GAMES)
+
+
 def _build_rows(conn, level: _Level) -> tuple[BuildRow, ...]:
     ids = [i for r in level.rows for i in _item_ids(r, level.granularity)]
     items = load_items(conn, ids)
-    out = []
-    for r in level.rows:
-        games, wins = int(r["games"]), int(r["wins"])
-        low, high = wilson_interval(wins, games)
-        out.append(BuildRow(
-            items=tuple(items[i] for i in _item_ids(r, level.granularity)),
-            games=games, wins=wins, pick_rate=rate(games, level.sample_size),
-            win_rate=rate(wins, games), ci_low=low, ci_high=high,
-            sufficient=games >= MIN_GAMES,
-        ))
-    return tuple(out)
+    return tuple(
+        build_row(tuple(items[i] for i in _item_ids(r, level.granularity)),
+                  int(r["games"]), int(r["wins"]), level.sample_size)
+        for r in level.rows
+    )
 
 
 def _label(level: _Level, opponent: ChampionRef, role: str) -> str:
@@ -159,8 +162,7 @@ def _fallback_note(level: _Level, champion: ChampionRef, opponent: ChampionRef,
     who = f"{champion.name}, {ROLE_LABELS[role].lower()}"
     matchup = f"{champion.name} vs {opponent.name}"
     if not answered:
-        return (f"Not enough games at any level (no build reaches {MIN_GAMES} games); "
-                f"showing per-item shares for {who}, all opponents")
+        return _unanswered_note(level, champion, role, who)
     if level.level == 2:
         return (f"Not enough {matchup} games for full three-item sequences; "
                 f"showing how often each item is among the first three")
@@ -172,18 +174,23 @@ def _fallback_note(level: _Level, champion: ChampionRef, opponent: ChampionRef,
     return None
 
 
+def _unanswered_note(level: _Level, champion: ChampionRef, role: str, who: str) -> str:
+    if level.sample_size == 0:
+        return f"No {champion.name} games at {ROLE_LABELS[role].lower()} in this dataset"
+    return (f"No build reaches {MIN_GAMES} games at any level; "
+            f"showing what exists for {who}, all opponents")
+
+
 def _require_champions(conn, champion_id: int, opponent_id: int) -> tuple[ChampionRef, ChampionRef]:
     refs = load_champions(conn, (champion_id, opponent_id))
-    if champion_id not in refs:
-        raise ValidationError(f"Unknown champion id {champion_id}.")
-    if opponent_id not in refs:
-        raise ValidationError(f"Unknown lane opponent id {opponent_id}.")
+    if champion_id not in refs or opponent_id not in refs:
+        raise ValidationError(UNKNOWN_CHAMPION_MESSAGE)
     return refs[champion_id], refs[opponent_id]
 
 
 def core_builds(conn, champion_id: int, role: str, opponent_champion_id: int) -> LadderAnswer:
     if role not in ROLES:
-        raise ValidationError(f"Unknown role {role!r}.")
+        raise ValidationError(ROLE_MESSAGE)
     champion, opponent = _require_champions(conn, champion_id, opponent_champion_id)
     params = {"champion_id": champion_id, "role": role, "opponent_id": opponent_champion_id,
               "full_core": FULL_CORE, "max_rows": MAX_ROWS_PER_LEVEL}
@@ -199,4 +206,5 @@ def core_builds(conn, champion_id: int, role: str, opponent_champion_id: int) ->
         fell_back=chosen.level > 1,
         fallback_note=_fallback_note(chosen, champion, opponent, role, answered),
         rows=_build_rows(conn, chosen),
+        answered=answered,
     )

@@ -67,3 +67,18 @@ def test_champion_overview_for_unplayed_champion(data):
     assert (overview.games, overview.by_role, overview.top_matchups) == (0, (), ())
     with pytest.raises(ValidationError):
         browse.champion_overview(data, 31337)
+
+
+def test_overview_flags_insufficient_roles_and_matchups(data):
+    games = GameMaker(data, prefix="NA1_S")
+    games.games(AHRI, LUX, 30, [LUDENS, SHADOWFLAME, DEATHCAP])
+    games.done()
+
+    overview = browse.champion_overview(data, AHRI)
+
+    by_role = {r.role: r for r in overview.by_role}
+    assert by_role["MIDDLE"].games == 34 and by_role["MIDDLE"].sufficient is True
+    assert by_role["TOP"].games == 2 and by_role["TOP"].sufficient is False
+    matchups = {(m.opponent.name, m.role): m for m in overview.top_matchups}
+    assert matchups[("Lux", "MIDDLE")].sufficient is True
+    assert matchups[("Zed", "MIDDLE")].sufficient is False

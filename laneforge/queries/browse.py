@@ -3,8 +3,9 @@ from __future__ import annotations
 
 from laneforge.queries._rows import load_champions, load_items, rate
 from laneforge.queries.errors import ValidationError
+from laneforge.queries.validate import UNKNOWN_CHAMPION_MESSAGE
 from laneforge.queries.models import (
-    ROLES, ChampionOverview, MatchDetail, MatchSummary, MatchupStat,
+    MIN_GAMES, ROLES, ChampionOverview, MatchDetail, MatchSummary, MatchupStat,
     ParticipantDetail, PurchaseRef, RoleStats,
 )
 
@@ -115,14 +116,22 @@ def _role_stats(role: str, result: dict, profile: dict | None) -> RoleStats:
     return RoleStats(role=role, games=games, wins=wins, win_rate=rate(wins, games),
                      physical_pm=pick("physical_pm"), magic_pm=pick("magic_pm"),
                      true_pm=pick("true_pm"), healing_pm=pick("healing_pm"),
-                     cc_pm=pick("cc_pm"), profile_source=source)
+                     cc_pm=pick("cc_pm"), profile_source=source,
+                     sufficient=games >= MIN_GAMES)
+
+
+def _matchup_stat(row: dict, opponents: dict) -> MatchupStat:
+    games, wins = int(row["games"]), int(row["wins"])
+    return MatchupStat(opponent=opponents[row["opponent_champion_id"]], role=row["role"],
+                       games=games, wins=wins, win_rate=rate(wins, games),
+                       sufficient=games >= MIN_GAMES)
 
 
 def champion_overview(conn, champion_id: int) -> ChampionOverview:
     """Games and win rate by role, threat profile per role, most-played lane opponents."""
     champion = load_champions(conn, (champion_id,)).get(champion_id)
     if champion is None:
-        raise ValidationError(f"Unknown champion id {champion_id}.")
+        raise ValidationError(UNKNOWN_CHAMPION_MESSAGE)
     params = {"champion_id": champion_id, "limit": TOP_MATCHUPS}
     results = {r["role"]: r for r in conn.execute(SQL_CHAMPION_ROLE_RESULTS, params).fetchall()}
     profiles = {r["role"]: r for r in conn.execute(SQL_CHAMPION_PROFILES, params).fetchall()}
@@ -130,10 +139,7 @@ def champion_overview(conn, champion_id: int) -> ChampionOverview:
                     for role in ROLES if role in results)
     matchup_rows = conn.execute(SQL_TOP_MATCHUPS, params).fetchall()
     opponents = load_champions(conn, (r["opponent_champion_id"] for r in matchup_rows))
-    matchups = tuple(MatchupStat(
-        opponent=opponents[r["opponent_champion_id"]], role=r["role"], games=int(r["games"]),
-        wins=int(r["wins"]), win_rate=rate(int(r["wins"]), int(r["games"])),
-    ) for r in matchup_rows)
+    matchups = tuple(_matchup_stat(r, opponents) for r in matchup_rows)
     games = sum(r.games for r in by_role)
     wins = sum(r.wins for r in by_role)
     return ChampionOverview(champion=champion, games=games, wins=wins,

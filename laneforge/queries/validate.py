@@ -7,17 +7,19 @@ from laneforge.queries.errors import ValidationError
 from laneforge.queries.models import ROLES
 
 MAX_ENEMIES = 4
+ROLE_MESSAGE = "Pick a role."
+UNKNOWN_CHAMPION_MESSAGE = "We don't have that champion."
 
 
 def require_role(role: str | None) -> str:
     if role not in ROLES:
-        raise ValidationError("Pick a role: Top, Jungle, Mid, Bot or Support.")
+        raise ValidationError(ROLE_MESSAGE)
     return role
 
 
 def require_distinct_matchup(champion_id: int, opponent_id: int) -> None:
     if champion_id == opponent_id:
-        raise ValidationError("Your champion and your lane opponent must be different champions.")
+        raise ValidationError("Your champion can't also be the lane opponent.")
 
 
 def require_enemies(champion_id: int, opponent_id: int,
@@ -27,10 +29,9 @@ def require_enemies(champion_id: int, opponent_id: int,
     if len(enemies) > MAX_ENEMIES:
         raise ValidationError(f"Name at most {MAX_ENEMIES} other enemy champions.")
     if len(set(enemies)) != len(enemies):
-        raise ValidationError("Each enemy champion can be listed only once.")
+        raise ValidationError("Name each enemy champion only once.")
     if champion_id in enemies:
-        raise ValidationError("Your own champion cannot also be an enemy.")
+        raise ValidationError("Your champion can't also be an enemy.")
     if opponent_id in enemies:
-        raise ValidationError("The lane opponent is already on the enemy team; "
-                              "list only the other four enemies.")
+        raise ValidationError("The lane opponent is already in the comp.")
     return enemies

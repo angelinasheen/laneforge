@@ -1,10 +1,19 @@
 {% extends 'base.html' %}
 {% import '_macros.html' as m %}
 {% block title %}{{ build.name }} · LaneForge{% endblock %}
+{#- Errors are shown beside the swap form below; only other notices go on top. -#}
+{% block notices %}{% with messages = get_flashed_messages(with_categories=true)|rejectattr('0', 'equalto', 'error')|list %}
+  {%- if messages %}
+  <div class="notice" role="status">
+    {%- for category, msg in messages %}<p>{{ msg }}</p>{% endfor %}
+  </div>
+  {%- endif %}
+{% endwith %}{% endblock %}
 {% block content %}
+{%- set errors = get_flashed_messages(category_filter=['error']) %}
 <article class="dossier">
   <header class="dossier-head">
-    <p class="kicker">Saved build <span class="num">No. {{ '%03d'|format(build.build_id) }}</span> · filed by {{ build.user.display_name }} · <span class="num">{{ build.created_at.strftime('%d %b %Y') }}</span>
+    <p class="kicker">Saved build <span class="num">No. {{ '%03d'|format(build.build_id) }}</span> · filed by {{ build.user.display_name }} · <span class="num nowrap">{{ build.created_at.strftime('%d %b %Y') }}</span>
       {% if build.is_customized %}<span class="tag tag-ox">CUSTOMIZED</span>{% else %}<span class="tag">OBSERVED</span>{% endif %}</p>
     <h1 class="headline">{{ build.name }}</h1>
     <p class="summary-line">{{ build.champion.name }} · {{ build.role|role_label }} · vs <a href="/champions/{{ build.opponent.champion_id }}">{{ build.opponent.name }}</a>{% if build.enemies %} · with {{ build.enemies|map(attribute='name')|join(', ') }}{% endif %}
@@ -19,20 +28,31 @@
       <ol class="strip">
         {%- for it in build.items %}<li><a href="/items/{{ it.item_id }}">{{ m.item_icon(it, 36, false) }}<span class="iname">{{ it.name }}</span></a></li>{% endfor %}
       </ol>
+      {%- set ob = build.observed %}
+      {%- if ob %}
+      <p class="observed-line">Observed in <span class="num">{{ ob.games|num }}</span> of <span class="num">{% if ob.pick_rate %}{{ (ob.games / ob.pick_rate)|round|int|num }}{% else %}—{% endif %}</span> games against {{ build.opponent.name }}
+        · {% if ob.sufficient %}won {{ m.wr(ob.win_rate) }} <span class="num ink-2">({{ m.ci_label(ob.ci_low, ob.ci_high) }})</span> {{ m.ci_bar(ob.win_rate, ob.ci_low, ob.ci_high) }}
+        {%- else %}won {{ m.wr(ob.win_rate, false, ob.games, ob.wins) }} <span class="insufficient">insufficient data</span>{% endif %}</p>
+      {%- endif %}
       <form method="post" action="/builds/{{ build.build_id }}/items" class="swap">
         <fieldset>
           <legend>Swap or reorder</legend>
+          <div class="swap-grid">
           {%- for pos in range(3) %}
           {%- set current = build.items[pos].item_id if build.items|length > pos else none %}
           <p>
             <label for="item-{{ pos }}"><span class="num">{{ pos + 1 }}</span><span class="visually-hidden"> item</span></label>
-            <select id="item-{{ pos }}" name="item">
+            <select id="item-{{ pos }}" name="item"{% if errors %} aria-describedby="swap-error"{% endif %}>
               {%- for li in legendary_items %}
               <option value="{{ li.item_id }}"{% if li.item_id == current %} selected{% endif %}>{{ li.name }}</option>
               {%- endfor %}
             </select>
           </p>
           {%- endfor %}
+          </div>
+          {%- if errors %}
+          <p class="form-error" id="swap-error" role="alert">{% for e in errors %}<strong>Not saved:</strong> {{ e }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>
+          {%- endif %}
           <p class="actions"><button type="submit">Save items</button> <span class="hint">Three different legendaries. Saving marks the build customized.</span></p>
         </fieldset>
       </form>
@@ -57,8 +77,8 @@
         <p><label for="b-name">Name</label>
           <input id="b-name" name="name" value="{{ build.name }}" required maxlength="60"></p>
         <p><label for="b-notes">Notes</label>
-          <textarea id="b-notes" name="notes" rows="3" maxlength="500">{{ build.notes or '' }}</textarea></p>
-        <p class="actions"><button type="submit">Rename</button></p>
+          <textarea id="b-notes" name="notes" rows="3" maxlength="2000">{{ build.notes or '' }}</textarea></p>
+        <p class="actions"><button type="submit">Save name &amp; notes</button></p>
       </form>
       <form method="post" action="/builds/{{ build.build_id }}/delete" class="stacked delete">
         <p>Deleting removes the build and its items from your file. It cannot be undone.</p>

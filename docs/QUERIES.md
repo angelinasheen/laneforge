@@ -98,7 +98,12 @@ FROM (
           WHEN 'physical' THEN pc.enemy_physical_share >= %(physical_share_min)s
           WHEN 'healing'  THEN pc.enemy_healing_pm     >  %(healing_pm_p75)s
           WHEN 'cc'       THEN pc.enemy_cc_pm          >  %(cc_pm_p75)s
-          WHEN 'pen'      THEN pc.opponent_champion_id =  %(opponent_id)s
+          WHEN 'pen'      THEN pc.opponent_champion_id IN (   -- class-sized, like the others
+                               SELECT o.champion_id FROM champion o
+                               WHERE CASE %(pen_kind)s
+                                       WHEN 'physical' THEN o.base_armor + o.armor_per_level * %(growth_levels)s
+                                       ELSE o.base_magic_resist + o.magic_resist_per_level * %(growth_levels)s
+                                     END >= %(pen_resist_min)s)            -- 60 at level 11
           ELSE FALSE
         END
 ) x
@@ -113,6 +118,12 @@ items, and aggregates games and wins per item. `HAVING` drops any item with
 fewer than 30 such games, so the page shows an evidence line only where the
 sample supports one and "stat model only, no sample" everywhere else.
 
+The pen rule's condition is class-sized like the four comp rules: not "games
+against this exact lane opponent" (too few for most matchups) but games whose
+lane opponent's champion has at least 60 of the relevant resist at level 11,
+computed from the champion table's base-and-growth columns (armor when the
+user's champion deals mostly physical damage, magic resist otherwise).
+
 The rule key only selects a branch of a fixed `CASE`; column names are never
 built from input. The class-level line ("players who completed a magic-resist
 item won 54%") is `evidence.SQL_CLASS_EVIDENCE`, one pass over the champion's
@@ -126,6 +137,48 @@ champion, role and the enemy share (2,756 rows), then a nested loop into
 scan measured the same (18 ms), so the choice is left to the planner. A whole
 situational block (profile, thresholds, candidates, one evidence query per
 triggered rule, class evidence) measured 60 ms cold.
+
+### Which candidates a rule shows (`champion_pool`, `situational._rule_block`)
+
+The stat model alone would offer Thornmail and Randuin's Omen to Ahri against a
+physical comp. Two queries per request, run once and shared by every rule,
+decide what is plausible for the champion:
+
+```sql
+-- champion_pool.SQL_FULL_CORE_GAMES
+SELECT COUNT(*) AS games
+FROM participant_core pc
+WHERE pc.champion_id = %(champion_id)s AND pc.role = %(role)s
+  AND pc.legendary_completions >= %(full_core)s;
+
+-- champion_pool.SQL_COMPLETED_ITEMS (only run when the count is >= 30)
+SELECT pe.item_id
+FROM participant_core pc
+JOIN purchase_event pe
+  ON pe.match_id = pc.match_id AND pe.participant_number = pc.participant_number
+WHERE pc.champion_id = %(champion_id)s AND pc.role = %(role)s
+GROUP BY pe.item_id
+HAVING COUNT(DISTINCT (pc.match_id, pc.participant_number)) >= %(min_games)s;
+```
+
+With at least 30 full-core games at the role, a candidate item is kept only if
+the champion completed it in at least 2% of their games there (and in no fewer
+than two games), so one stray purchase cannot put a tank item on a mage's list.
+This floor is a deliberate step beyond draft 4, which only says "never
+completed"; it exists because both real and synthetic data contain one-off
+purchases. Below 30 games "never bought" means nothing, so the full stat-model list is kept and
+`SituationalAnswer.thin_sample` is set; the page says once that every
+suggestion is stat-model only.
+
+Each rule's surviving candidates are then ordered in two groups: items with an
+evidence line (at least 30 qualifying games) first, then stat-only items; the
+stat-model score orders items within each group. The list is capped at five per
+rule after filtering. When a rule's list has no evidence-backed item, the
+answer carries one sentence in `SituationalAnswer.rule_notes[rule]` ("None of
+these has 30 Ahri games behind it; ordered by the stat model only."), or, when
+filtering left nothing, "Ahri never completed a magic resist item at mid in this
+dataset." `rule_notes` is left empty when `thin_sample` is set, so the caveat is
+said once, not per rule.
 
 ## 4. Saving a build (`saved.create_build`)
 

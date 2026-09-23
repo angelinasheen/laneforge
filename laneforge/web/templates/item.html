@@ -4,7 +4,7 @@
 {% block content %}
 <article class="dossier">
   <header class="dossier-head">
-    <p class="kicker">Item <span class="num">{{ item.item_id }}</span>{% if item.is_legendary and not item.is_boots %} · legendary{% elif item.is_boots %} · boots{% endif %}</p>
+    <p class="kicker">Item{% if item.is_legendary and not item.is_boots %} · legendary{% elif item.is_boots %} · boots{% endif %}{% if dataset and dataset.patch %} · patch <span class="num">{{ dataset.patch }}</span>{% endif %}</p>
     <div class="headline-row">
       <span class="portraits" aria-hidden="true">{{ m.item_icon(item, 64, false) }}</span>
       <h1 class="headline">{{ item.name }}</h1>
@@ -23,8 +23,9 @@
         <tr>
           <th scope="row"><a class="with-icon" href="/champions/{{ u.champion.champion_id }}">{{ m.champ_icon(u.champion, 24, false, '') }}{{ u.champion.name }}</a></th>
           <td>{{ u.role|role_label }}</td>
-          <td class="n num{% if u.games < 30 %} mute{% endif %}">{{ u.games|num }}</td>
-          <td class="n">{{ m.wr(u.win_rate, u.games >= 30) }}</td>
+          {%- set ok = u.sufficient if u.sufficient is defined else u.games >= 30 %}
+          <td class="n num{% if not ok %} mute{% endif %}">{{ u.games|num }}</td>
+          <td class="n wr-cell">{{ m.wr(u.win_rate, ok, u.games, u.wins) }}{% if not ok %}<span class="insufficient">insufficient data</span>{% endif %}</td>
         </tr>
       {%- endfor %}
       </tbody>

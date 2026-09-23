@@ -8,6 +8,7 @@ from laneforge.queries.builds import core_builds
 from laneforge.queries.errors import ValidationError
 from laneforge.queries.models import ROLES
 from laneforge.queries.situational import situational_items
+from laneforge.queries.validate import UNKNOWN_CHAMPION_MESSAGE
 from laneforge.web.blueprints import dataset, get_conn, not_found, render
 from laneforge.web.forms import MatchupQuery, parse_matchup
 
@@ -23,9 +24,8 @@ def _resolve_matchup(conn):
     query: MatchupQuery = parse_matchup(request.args)
     ids = (query.champion_id, query.opponent_champion_id, *query.enemy_ids)
     refs = catalog.champions_by_id(conn, ids)
-    missing = [i for i in ids if i not in refs]
-    if missing:
-        raise ValidationError(f"There is no champion with id {missing[0]}.")
+    if any(i not in refs for i in ids):
+        raise ValidationError(UNKNOWN_CHAMPION_MESSAGE)
     return (query, refs[query.champion_id], refs[query.opponent_champion_id],
             tuple(refs[i] for i in query.enemy_ids))
 
@@ -39,17 +39,25 @@ def _situational(conn, query: MatchupQuery):
                              query.opponent_champion_id, query.enemy_ids)
 
 
+def _form(status: int = 200, form_error: str | None = None):
+    """The matchup form. On a rejected submission it is re-rendered with the
+    message; index.html pre-fills every field from request.args."""
+    return render("index.html", status=status, champions=catalog.list_champions(get_conn()),
+                  roles=ROLES, dataset=dataset(), form_error=form_error)
+
+
 @bp.get("/")
 def index():
-    conn = get_conn()
-    return render("index.html", champions=catalog.list_champions(conn), roles=ROLES,
-                  dataset=dataset())
+    return _form()
 
 
 @bp.get("/matchup")
 def matchup():
     conn = get_conn()
-    query, champion, opponent, enemies = _resolve_matchup(conn)
+    try:
+        query, champion, opponent, enemies = _resolve_matchup(conn)
+    except ValidationError as err:
+        return _form(status=400, form_error=err.message)
     return render("matchup.html", champion=champion, role=query.role, opponent=opponent,
                   enemies=enemies, ladder=_ladder(conn, query),
                   situational=_situational(conn, query), query_string=query.query_string())

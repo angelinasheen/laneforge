@@ -1,9 +1,13 @@
 {% import '_macros.html' as m %}
 {%- if request.headers.get('HX-Request') == 'true' %}{% set oob = true %}{% include 'partials/answered.html' %}{% endif %}
 {%- set per_item = ladder.granularity == 'item' %}
+{%- set can_save = current_user and not per_item %}
 {%- set enemy_ids = request.args.getlist('enemy') %}
+{%- set ncols = 6 if can_save else 5 %}
 <div class="core" id="core-rows">
-{%- if not ladder.rows %}
+{%- if ladder.sample_size == 0 %}
+  <p class="empty">No {{ champion.name }} games at {{ role|role_label }} in this dataset.</p>
+{%- elif not ladder.rows %}
   <p class="empty">No {{ champion.name }} {{ role|role_label }} player in the dataset finished three legendary items, at any level. There is nothing to rank.</p>
 {%- else %}
 <div class="table-scroll">
@@ -16,12 +20,13 @@
       <th scope="col" class="n">{{ 'In first three' if per_item else 'Pick rate' }}</th>
       <th scope="col" class="wr">Win rate <span class="sub">95% interval</span></th>
       <th scope="col" class="n">Games</th>
-      {%- if not per_item %}<th scope="col" class="save"><span class="visually-hidden">Save</span></th>{% endif %}
+      {%- if can_save %}<th scope="col" class="save"><span class="visually-hidden">Save</span></th>{% endif %}
     </tr>
   </thead>
   <tbody>
   {%- for row in ladder.rows %}
-    <tr class="{{ 'ok' if row.sufficient else 'thin' }}">
+    {%- set rid = loop.index %}
+    <tr class="{{ 'ok' if row.sufficient else 'thin' }} build-row">
       <td class="rank">{{ loop.index }}</td>
       <td class="build">
         <ol class="strip{% if per_item %} single{% endif %}">
@@ -33,51 +38,62 @@
       <td class="n num" data-label="{{ 'In first three' if per_item else 'Pick rate' }}">{{ row.pick_rate|pct1 }}</td>
       <td class="wr" data-label="Win rate">
         {%- if row.sufficient %}
-        {{ m.wr(row.win_rate) }} {{ m.ci_bar(row.win_rate, row.ci_low, row.ci_high) }}
-        <span class="ci-text num">{{ (row.ci_low * 100)|round|int }}–{{ (row.ci_high * 100)|round|int }}</span>
+        {{ m.wr(row.win_rate) }}{{ m.ci_bar(row.win_rate, row.ci_low, row.ci_high) }}
+        <span class="ci-text num">{{ m.ci_label(row.ci_low, row.ci_high) }}</span>
         {%- else %}
-        {{ m.wr(row.win_rate, false) }} <span class="insufficient">insufficient data</span>
+        {{ m.wr(row.win_rate, false, row.games, row.wins) }}<span class="insufficient">insufficient data</span>
         {%- endif %}
       </td>
       <td class="n num{% if not row.sufficient %} mute{% endif %}" data-label="Games">{{ row.games|num }}</td>
-      {%- if not per_item %}
+      {%- if can_save %}
       <td class="save">
-        {%- if current_user %}
-        <details class="save-build">
-          <summary>Save this build</summary>
-          <form method="post" action="/builds">
-            <input type="hidden" name="champion" value="{{ champion.champion_id }}">
-            <input type="hidden" name="role" value="{{ role }}">
-            <input type="hidden" name="opponent" value="{{ opponent.champion_id }}">
-            {%- for e in enemy_ids if e %}
-            <input type="hidden" name="enemy" value="{{ e }}">
-            {%- endfor %}
-            {%- for it in row.items %}
-            <input type="hidden" name="item" value="{{ it.item_id }}">
-            {%- endfor %}
-            <input type="hidden" name="observed" value="1">
-            <label for="save-name-{{ loop.index }}">Name</label>
-            <input id="save-name-{{ loop.index }}" name="name" required minlength="1" maxlength="60"
-                   value="{{ champion.name }} vs {{ opponent.name }}, {{ row.items[0].name }} first">
-            <button type="submit">Save</button>
-          </form>
+        <details class="save-build" id="save-{{ rid }}">
+          <summary aria-controls="save-form-{{ rid }}">Save this build</summary>
         </details>
-        {%- else %}
-        <a class="save-link" href="/signin?next={{ ('/matchup?' ~ request.query_string.decode())|urlencode }}">Sign in to save</a>
-        {%- endif %}
       </td>
       {%- endif %}
     </tr>
+    {%- if can_save %}
+    <tr class="save-row" id="save-form-{{ rid }}">
+      <td colspan="{{ ncols }}">
+        <form method="post" action="/builds" class="save-form">
+          <input type="hidden" name="champion" value="{{ champion.champion_id }}">
+          <input type="hidden" name="role" value="{{ role }}">
+          <input type="hidden" name="opponent" value="{{ opponent.champion_id }}">
+          {%- for e in enemy_ids if e %}
+          <input type="hidden" name="enemy" value="{{ e }}">
+          {%- endfor %}
+          {%- for it in row.items %}
+          <input type="hidden" name="item" value="{{ it.item_id }}">
+          {%- endfor %}
+          <input type="hidden" name="observed" value="1">
+          <p class="save-name">
+            <label for="save-name-{{ rid }}">Name</label>
+            <input id="save-name-{{ rid }}" name="name" required minlength="1" maxlength="60"
+                   value="{{ (champion.name ~ ' vs ' ~ opponent.name ~ ', ' ~ row.items[0].name ~ ' first')|truncate(60, true, '…', 0) }}">
+          </p>
+          <p class="save-notes">
+            <label for="save-notes-{{ rid }}">Notes <span class="opt">optional</span></label>
+            <textarea id="save-notes-{{ rid }}" name="notes" rows="2" maxlength="2000"></textarea>
+          </p>
+          <p class="save-go"><button type="submit">Save</button></p>
+        </form>
+      </td>
+    </tr>
+    {%- endif %}
   {%- endfor %}
   </tbody>
 </table>
 </div>
 <p class="footnote">
   {%- if per_item %}
-  No single three-item order reached 30 games, so each legendary is shown with the share of the <span class="num">{{ ladder.sample_size|num }}</span> full-core players who finished it among their first three. Bars run from 30% to 70% win rate with a tick at 50%.
+  No single three-item order reached 30 games, so each legendary is shown with the share of the <span class="num">{{ ladder.sample_size|num }}</span> full-core games in which it was one of the first three. Bars run from 30% to 70% win rate with a tick at 50%.
   {%- else %}
-  Pick rate is the share of the <span class="num">{{ ladder.sample_size|num }}</span> players who finished three legendaries and built exactly this order. Each bar runs from 30% to 70% win rate with a tick at 50%; the dot is the observed rate and the whiskers its 95% interval. Below 30 games the win rate is greyed and no interval is drawn.
+  Pick rate is the share of the <span class="num">{{ ladder.sample_size|num }}</span> games with three finished legendaries that followed exactly this order. Each bar runs from 30% to 70% win rate with a tick at 50%; the dot is the observed rate and the whiskers its 95% interval. Below 30 games the win rate is greyed and no interval is drawn.
   {%- endif %}
 </p>
+{%- if not current_user and not per_item %}
+<p class="footnote save-hint"><a href="/signin?next={{ ('/matchup?' ~ request.query_string.decode())|urlencode }}">Sign in</a> to save any of these.</p>
+{%- endif %}
 {%- endif %}
 </div>

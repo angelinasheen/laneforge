@@ -29,7 +29,7 @@ preview = _load_preview()
 
 CONTRACT_CONTEXT: dict[str, set[str]] = {
     "base.html": {"current_user", "dataset"},
-    "index.html": {"champions", "roles", "dataset"},
+    "index.html": {"champions", "roles", "dataset", "form_error"},
     "matchup.html": {"champion", "role", "opponent", "enemies", "ladder", "situational", "query_string"},
     "partials/core.html": {"ladder", "champion", "role", "opponent"},
     "partials/situational.html": {"situational", "champion", "role", "opponent", "enemies"},
@@ -129,9 +129,11 @@ def test_save_form_carries_matchup_and_items_as_hidden_fields(client):
 
 def test_signed_out_save_links_to_signin_with_next(client):
     html = client.get("/preview/matchup?anon=1&" + preview.MATCHUP_QS).get_data(as_text=True)
-    assert "Sign in to save" in html
-    assert "/signin?next=/matchup%3F" in html and "champion%3D103" in html
+    assert "to save any of these." in html
+    assert html.count("/signin?next=/matchup%3F") == 1       # one footnote, not one link per row
+    assert "champion%3D103" in html
     assert 'action="/builds"' not in html
+    assert "Save this build" not in html
 
 
 def test_fallback_page_says_it_fell_back_and_comp_is_partial(client):
@@ -152,7 +154,9 @@ def test_situational_block_shows_score_evidence_and_stat_model_only(client):
     assert "stat model only, no sample" in html
     assert "In <span class=\"num\">236</span> games where Ahri faced" in html
     assert "above 75th pct" in html
-    assert "+1,412 eHP per 1,000 gold" in html
+    assert "+1,412 effective HP per 1,000 gold" in html
+    assert "75th percentile of comps: <span class=\"num\">842/min</span>" in html
+    assert "The comp is 74% physical damage." in html and "The The" not in html
 
 
 def test_htmx_shell_requests_both_partials_with_same_query(client):
@@ -245,3 +249,109 @@ def test_preview_filters_format_like_the_design():
     assert preview.f_num(1840) == "1,840"
     assert preview.f_mmss(838_000) == "13:58"
     assert preview.f_role_label("MIDDLE") == "Mid"
+
+
+# --- critique fixes: trust line, thin samples, rule notes, form errors ---------------
+
+def test_unanswered_ladder_never_claims_an_answer_level(client):
+    html = _get(client, "matchup-unanswered").get_data(as_text=True)
+    assert "answered at level" not in html
+    assert "no level reached 30 games" in html
+    assert 'aria-current="step"' not in html
+    assert "not enough games at any level; showing per-item shares" in html
+
+
+def test_empty_ladder_says_plainly_there_are_no_games(client):
+    html = _get(client, "matchup-empty").get_data(as_text=True)
+    assert "No Ahri games at Bot in this dataset." in html
+    assert "answered at level" not in html
+    assert 'class="ladder"' not in html
+    assert "There is nothing to rank" not in html
+
+
+def test_thin_sample_line_and_rule_notes_replace_repeated_no_sample_lines(client):
+    html = _get(client, "matchup-unanswered").get_data(as_text=True)
+    assert "Ahri has fewer than 30 games at Support here, so these are stat-model picks without evidence." in html
+    assert "stat model only, no sample" not in html          # said once, not per row
+    assert html.count('class="suggestions compact"') == 3
+
+
+def test_rule_note_compacts_only_its_own_rule(client):
+    html = _get(client, "situational").get_data(as_text=True)
+    assert html.count('class="rule-note"') == 1
+    assert "+18% damage to Zed" in html
+    assert "stat model only, no sample" in html          # the armor rule has no note
+
+
+def test_evidence_sentence_reads_with_interval_percent(client):
+    html = _get(client, "situational").get_data(as_text=True)
+    assert "players who completed Zhonya&#39;s Hourglass won <span class=\"num\">55.5%</span>" in html
+    assert "(49–62%)" in html
+
+
+def test_core_interval_labels_use_en_dash_and_percent(client):
+    html = _get(client, "matchup").get_data(as_text=True)
+    assert "44–69%" in html
+
+
+def test_signed_in_save_form_is_an_inline_row_with_notes(client):
+    html = _get(client, "matchup").get_data(as_text=True)
+    assert html.count('class="save-row"') == 5
+    assert 'name="notes"' in html and 'maxlength="2000"' in html
+    assert 'name="name" required minlength="1" maxlength="60"' in html
+
+
+def test_form_error_renders_under_sentence_with_prefilled_selects(client):
+    html = _get(client, "index-error").get_data(as_text=True)
+    assert "Not compiled:</strong> Pick two different champions" in html
+    assert '<option value="103" selected>Ahri</option>' in html
+    assert "and they also have" in html and ">anyone</option>" in html
+
+
+def test_index_without_form_error_has_no_error_line(client):
+    html = _get(client, "index").get_data(as_text=True)
+    assert "Not compiled" not in html
+
+
+def test_matchup_kicker_links_back_to_prefilled_form(client):
+    html = _get(client, "matchup").get_data(as_text=True)
+    assert 'href="/?champion=103&amp;role=MIDDLE' in html and "change matchup" in html
+    assert "103-MIDDLE-238" not in html
+
+
+def test_insufficient_rows_on_champion_and_item_pages(client):
+    champ_html = _get(client, "champion").get_data(as_text=True)
+    item_html = _get(client, "item").get_data(as_text=True)
+    assert "insufficient data" in champ_html and ">1–1</span>" in champ_html
+    assert "insufficient data" in item_html and ">1–0</span>" in item_html
+
+
+def test_observed_build_shows_its_matchup_row(client):
+    html = _get(client, "build-observed").get_data(as_text=True)
+    assert "Observed in <span class=\"num\">58</span> of <span class=\"num\">212</span> games against Zed" in html
+    assert "(44–69%)" in html
+    assert "Save name &amp; notes" in html
+
+
+def test_error_flash_renders_beside_swap_form_not_on_top(client):
+    html = _get(client, "build-error").get_data(as_text=True)
+    assert 'id="swap-error"' in html
+    assert "Not saved:</strong> A build needs three different legendary items." in html
+    assert html.count("A build needs three different legendary items.") == 1
+
+
+def test_items_catalogue_names_kind_in_words(client):
+    html = _get(client, "items").get_data(as_text=True)
+    assert '<span class="kind">legendary</span>' in html and '<span class="kind">boots</span>' in html
+    assert ">L</abbr>" not in html
+
+
+def test_match_headline_names_winner_and_length(client):
+    html = _get(client, "match").get_data(as_text=True)
+    assert "Blue side won in" in html and "33:41" in html
+    assert "legendaries have a red rule under them" in html
+
+
+def test_signin_page_hides_nav_signin_link(client):
+    html = client.get("/signin?anon=1").get_data(as_text=True)       # the real path, so request.path matches
+    assert "/signin?next=" not in html

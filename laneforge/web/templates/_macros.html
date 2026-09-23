@@ -55,6 +55,17 @@
 /matchup?champion={{ champion.champion_id }}&amp;role={{ role }}&amp;opponent={{ opponent.champion_id }}
 {%- endmacro %}
 
-{% macro wr(value, sufficient=true) -%}
+{#- A win rate. Greyed when not sufficient; with two games or fewer a
+    percentage is meaningless, so it shows wins–losses ("1–1") instead. -#}
+{% macro wr(value, sufficient=true, games=none, wins=none) -%}
+{%- if games is not none and wins is not none and games <= 2 -%}
+<span class="num mute" title="{{ wins }} won, {{ games - wins }} lost">{{ wins }}–{{ games - wins }}</span>
+{%- else -%}
 <span class="num{% if not sufficient %} mute{% elif value > 0.5 %} up{% endif %}">{{ value|pct1 }}</span>
+{%- endif -%}
+{%- endmacro %}
+
+{#- "34–62%": a 95% interval as whole percents with an en dash. -#}
+{% macro ci_label(lo, hi) -%}
+{{ (lo * 100)|round|int }}–{{ (hi * 100)|round|int }}%
 {%- endmacro %}

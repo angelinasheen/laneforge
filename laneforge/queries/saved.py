@@ -14,14 +14,17 @@ import psycopg.errors
 from laneforge.queries._rows import (
     ITEM_NUMERIC_FIELDS, load_champions, load_items, user_from_row,
 )
+from laneforge.queries.builds import FULL_CORE, build_row
 from laneforge.queries.errors import ValidationError
-from laneforge.queries.models import ItemRef, SavedBuild
+from laneforge.queries.models import BuildRow, ItemRef, SavedBuild
 from laneforge.queries.saved_sql import (
     SQL_BUILD_ENEMIES, SQL_BUILD_ITEMS, SQL_DELETE_BUILD, SQL_DELETE_BUILD_ITEMS,
     SQL_GET_BUILD, SQL_INSERT_BUILD, SQL_INSERT_BUILD_ITEM, SQL_INSERT_ENEMY, SQL_LIST_BUILDS,
-    SQL_MARK_CUSTOMIZED, SQL_OBSERVED_SEQUENCE, SQL_RENAME_BUILD, SQL_USER_EXISTS,
+    SQL_MARK_CUSTOMIZED, SQL_OBSERVED_ROWS, SQL_OBSERVED_SEQUENCE, SQL_RENAME_BUILD, SQL_USER_EXISTS,
 )
-from laneforge.queries.validate import require_distinct_matchup, require_enemies, require_role
+from laneforge.queries.validate import (
+    UNKNOWN_CHAMPION_MESSAGE, require_distinct_matchup, require_enemies, require_role,
+)
 
 BUILD_SIZE = 3
 NAME_MAX = 60
@@ -78,7 +81,7 @@ def _require_champions(conn, ids: tuple[int, ...]) -> None:
     found = load_champions(conn, ids)
     missing = [i for i in ids if i not in found]
     if missing:
-        raise ValidationError(f"Unknown champion id {missing[0]}.")
+        raise ValidationError(UNKNOWN_CHAMPION_MESSAGE)
 
 
 def is_observed_sequence(conn, champion_id: int, role: str, item_ids) -> bool:
@@ -168,11 +171,26 @@ def _assemble(conn, rows: list[dict]) -> list[SavedBuild]:
     champion_ids += [e["champion_id"] for es in enemy_rows.values() for e in es]
     champions = load_champions(conn, champion_ids)
     items = load_items(conn, [x["item_id"] for xs in item_rows.values() for x in xs])
+    observed = _observed_counts(conn, ids)
     return [_saved_build(r, champions, items, enemy_rows.get(r["build_id"], []),
-                         item_rows.get(r["build_id"], [])) for r in rows]
+                         item_rows.get(r["build_id"], []), observed.get(r["build_id"]))
+            for r in rows]
 
 
-def _saved_build(r, champions, items, enemy_rows, item_rows) -> SavedBuild:
+def _observed_counts(conn, build_ids: list[int]) -> dict[int, dict]:
+    """build_id -> games/wins/sample_size, only for uncustomized builds seen in their matchup."""
+    rows = conn.execute(SQL_OBSERVED_ROWS, {"ids": build_ids, "full_core": FULL_CORE}).fetchall()
+    return {r["build_id"]: r for r in rows if r["games"] > 0}
+
+
+def _observed_row(build_items: tuple[ItemRef, ...], counts: dict | None) -> BuildRow | None:
+    if counts is None:
+        return None
+    return build_row(build_items, int(counts["games"]), int(counts["wins"]),
+                     int(counts["sample_size"]))
+
+
+def _saved_build(r, champions, items, enemy_rows, item_rows, counts) -> SavedBuild:
     build_items = tuple(items[x["item_id"]] for x in item_rows)
     return SavedBuild(
         build_id=r["build_id"], user=user_from_row(r), name=r["name"], notes=r["notes"],
@@ -181,6 +199,7 @@ def _saved_build(r, champions, items, enemy_rows, item_rows) -> SavedBuild:
         enemies=tuple(champions[e["champion_id"]] for e in enemy_rows),
         items=build_items, is_customized=r["is_customized"], created_at=r["build_created_at"],
         stat_totals=stat_totals(build_items),
+        observed=_observed_row(build_items, counts),
     )
 
 

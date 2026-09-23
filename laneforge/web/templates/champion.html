@@ -5,13 +5,13 @@
 {%- set o = overview %}
 <article class="dossier">
   <header class="dossier-head">
-    <p class="kicker">Champion <span class="num">{{ champion.champion_id }}</span></p>
+    <p class="kicker">Champion{% if dataset and dataset.patch %} · patch <span class="num">{{ dataset.patch }}</span>{% endif %}</p>
     <div class="headline-row">
       <span class="portraits" aria-hidden="true">{{ m.champ_icon(champion, 64, false, '') }}</span>
       <h1 class="headline">{{ champion.name }}</h1>
     </div>
     {%- if o and o.games %}
-    <p class="summary-line"><span class="num">{{ o.games|num }}</span> games · won {{ m.wr(o.win_rate, o.games >= 30) }}</p>
+    <p class="summary-line"><span class="num">{{ o.games|num }}</span> games · won {{ m.wr(o.win_rate, o.games >= 30, o.games, o.wins) }}{% if o.games < 30 %} <span class="insufficient">insufficient data</span>{% endif %}</p>
     {%- else %}
     <p class="summary-line mute-ink">Not played in the loaded matches.</p>
     {%- endif %}
@@ -31,8 +31,9 @@
       {%- for r in o.by_role %}
         <tr>
           <th scope="row">{{ r.role|role_label }}{% if r.profile_source != 'role' %}<sup class="mark">*</sup>{% endif %}</th>
-          <td class="n num{% if r.games < 30 %} mute{% endif %}">{{ r.games|num }}</td>
-          <td class="n">{{ m.wr(r.win_rate, r.games >= 30) }}</td>
+          {%- set ok = r.sufficient if r.sufficient is defined else r.games >= 30 %}
+          <td class="n num{% if not ok %} mute{% endif %}">{{ r.games|num }}</td>
+          <td class="n wr-cell">{{ m.wr(r.win_rate, ok, r.games, r.wins) }}{% if not ok %}<span class="insufficient">insufficient data</span>{% endif %}</td>
           {%- for v in [r.physical_pm, r.magic_pm, r.true_pm, r.healing_pm] %}
           <td class="n num">{{ v|num if v is not none else '—' }}</td>
           {%- endfor %}
@@ -43,7 +44,7 @@
       </tbody>
     </table>
     </div>
-    <p class="footnote">Threat profile per minute of game time: damage dealt to champions by type, healing, and seconds of crowd control applied. {% if o.by_role|rejectattr('profile_source', 'equalto', 'role')|list %}<sup class="mark">*</sup> Too few games in this role for its own profile; the figures are the champion’s all-role mean.{% endif %}</p>
+    <p class="footnote">Threat profile per minute of game time, averaged over the games in each role: damage dealt to champions by type, healing, and seconds of crowd control applied. {% if o.by_role|rejectattr('profile_source', 'equalto', 'role')|list %}<sup class="mark">*</sup> Too few games in this role for its own profile; the figures are the champion’s all-role mean.{% endif %}</p>
   </section>
   {%- endif %}
 
@@ -58,8 +59,9 @@
         <tr>
           <th scope="row"><a class="with-icon" href="/champions/{{ mu.opponent.champion_id }}">{{ m.champ_icon(mu.opponent, 24, false, '') }}{{ mu.opponent.name }}</a></th>
           <td>{{ mu.role|role_label }}</td>
-          <td class="n num{% if mu.games < 30 %} mute{% endif %}">{{ mu.games|num }}</td>
-          <td class="n">{{ m.wr(mu.win_rate, mu.games >= 30) }}</td>
+          {%- set ok = mu.sufficient if mu.sufficient is defined else mu.games >= 30 %}
+          <td class="n num{% if not ok %} mute{% endif %}">{{ mu.games|num }}</td>
+          <td class="n wr-cell">{{ m.wr(mu.win_rate, ok, mu.games, mu.wins) }}{% if not ok %}<span class="insufficient">insufficient data</span>{% endif %}</td>
           <td><a href="{{ m.matchup_href(champion, mu.role, mu.opponent) }}">Dossier</a></td>
         </tr>
       {%- endfor %}

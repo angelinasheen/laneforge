@@ -12,14 +12,17 @@
     </span>
     <span class="meter-note">
       {%- if p75 is none %}<span class="mute">no reference percentile</span>
-      {%- elif above %}<span class="flag">above 75th pct</span> <span class="mute num">p75 {{ fmt(p75) }}</span>
-      {%- else %}<span class="mute num">p75 {{ fmt(p75) }}</span>{% endif -%}
+      {%- else %}{% if above %}<span class="flag">above 75th pct</span> {% endif %}<span class="mute">75th percentile of comps: <span class="num">{{ fmt(p75) }}/min</span></span>{% endif -%}
     </span>
   </div>
 {%- endmacro %}
 {%- macro whole(v) %}{{ v|num }}{% endmacro %}
 {%- macro tenths(v) %}{{ '%.1f'|format(v) }}{% endmacro %}
 
+{%- set notes = situational.rule_notes or {} %}
+{%- if situational.thin_sample %}
+<p class="thin-note">{{ champion.name }} has fewer than 30 games at {{ role|role_label }} here, so these are stat-model picks without evidence.</p>
+{%- endif %}
 <div class="situational" id="situational-body">
   <div class="comp">
     <h3 class="minor">Enemy damage split</h3>
@@ -38,7 +41,7 @@
     {{ meter('healing', p.healing_pm, p.healing_pm_p75, whole) }}
     {{ meter('crowd control', p.cc_pm, p.cc_pm_p75, tenths) }}
     {%- if p.partial %}
-    <p class="partial-note">The comp profile is partial: {{ enemies|length }} of 4 other enemies given, so it leans on {{ opponent.name }}.</p>
+    <p class="partial-note note-rule">The comp profile is partial: {{ enemies|length }} of 4 other enemies given, so it leans on {{ opponent.name }}.</p>
     {%- endif %}
     <ul class="members" aria-label="Who the profile is built from">
       {%- for mem in p.members %}
@@ -50,30 +53,36 @@
 
   <div class="rules">
   {%- for rule in situational.triggered %}
+    {%- set note = notes.get(rule.key) %}
+    {#- compact rows when the note or the thin-sample line already says there is no evidence #}
+    {%- set compact = note or situational.thin_sample %}
     <section class="rule" aria-labelledby="rule-{{ rule.key }}">
       <p class="rule-head"><strong id="rule-{{ rule.key }}" class="runin-minor">{{ rule.item_class|capitalize }}.</strong> {{ rule.reason }}.
       {%- set ce = situational.class_evidence.get(rule.key) %}
       {%- if ce %} In <span class="num">{{ ce.games|num }}</span> games where {{ champion.name }} faced {{ ce.condition_text }}, players who completed any {{ rule.item_class }} item won <span class="num">{{ ce.win_rate|pct1 }}</span>.{% endif %}</p>
-      <ol class="suggestions">
+      {%- if note %}
+      <p class="rule-note">{{ note }}</p>
+      {%- endif %}
+      <ol class="suggestions{% if compact %} compact{% endif %}">
         {%- for s in situational.suggestions if s.rule.key == rule.key %}
         <li class="sugg">
-          <a class="sugg-item" href="/items/{{ s.item.item_id }}">{{ m.item_icon(s.item, 36, false) }}<span class="sugg-name">{{ s.item.name }}</span></a>
-          <span class="sugg-rule">{{ rule.item_class }}</span>
+          <a class="sugg-item" href="/items/{{ s.item.item_id }}">{{ m.item_icon(s.item, 28 if compact else 36, false) }}<span class="sugg-name">{{ s.item.name }}</span></a>
           <span class="sugg-score num" title="stat-model score {{ '%.2f'|format(s.score) }}">{{ s.score_text }}</span>
+          {%- if not compact %}
           <span class="sugg-ev">
-            {%- if s.evidence %}{{ m.wr(s.evidence.win_rate) }} {{ m.ci_bar(s.evidence.win_rate, s.evidence.ci_low, s.evidence.ci_high) }}
-            {%- else %}<span class="insufficient">no sample</span>{% endif -%}
+            {%- if s.evidence %}{{ m.wr(s.evidence.win_rate) }}{{ m.ci_bar(s.evidence.win_rate, s.evidence.ci_low, s.evidence.ci_high) }}{% endif -%}
           </span>
           <p class="sugg-line">
             {%- if s.evidence -%}
-            In <span class="num">{{ s.evidence.games|num }}</span> games where {{ champion.name }} faced {{ s.evidence.condition_text }}, players who completed {{ s.item.name }} won <span class="num">{{ s.evidence.win_rate|pct1 }}</span> <span class="num mute">({{ (s.evidence.ci_low * 100)|round|int }}–{{ (s.evidence.ci_high * 100)|round|int }})</span>.
+            In <span class="num">{{ s.evidence.games|num }}</span> games where {{ champion.name }} faced {{ s.evidence.condition_text }}, players who completed {{ s.item.name }} won <span class="num">{{ s.evidence.win_rate|pct1 }}</span> <span class="num ink-2">({{ m.ci_label(s.evidence.ci_low, s.evidence.ci_high) }})</span>.
             {%- else -%}
             <span class="mute-ink">stat model only, no sample</span>: {{ champion.name }} finished it in fewer than 30 such games.
             {%- endif -%}
           </p>
+          {%- endif %}
         </li>
         {%- else %}
-        <li class="empty">No purchasable item in the catalogue matches this class.</li>
+        {%- if not note %}<li class="empty">No purchasable item in the catalogue matches this class.</li>{% endif %}
         {%- endfor %}
       </ol>
     </section>

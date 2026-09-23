@@ -3,15 +3,20 @@ import pytest
 
 from laneforge.queries.errors import ValidationError
 from laneforge.queries.models import CompProfile
-from laneforge.queries.rules import pen_rule, triggered_rules
+from laneforge.queries.models import ChampionRef
+from laneforge.queries.rules import condition_text, pen_rule, triggered_rules
 from laneforge.queries.situational import comp_profile, situational_items
 from tests.query_fixtures import (
     MORELLO,
-    BANSHEES, DEATHCAP, GameMaker, LUDENS, MERCS, SERYLDA, YOUMUU, seed_catalogue,
+    BANSHEES, DEATHCAP, GameMaker, LUDENS, MERCS, SERYLDA, YOUMUU, ZHONYAS, seed_catalogue,
 )
+from tests import factories as f
 
 AHRI, ZED, TALON, LUX = 103, 238, 91, 99
 MAGIC_HEAVY = dict(physical_damage=0, magic_damage=20000, true_damage=0)
+PHYSICAL_HEAVY = dict(physical_damage=20000, magic_damage=0, true_damage=0)
+THORNMAIL, RANDUINS = 3075, 3143
+ZHONYA_CORE = [LUDENS, ZHONYAS, DEATHCAP]
 AHRI_CORE = [LUDENS, BANSHEES, DEATHCAP]
 
 
@@ -84,12 +89,13 @@ def test_comp_profile_uses_opponent_role_profile_and_enemy_means(games):
 
 
 def test_magic_comp_suggests_mr_items_ordered_by_score(games):
-    games.games(AHRI, ZED, 30, AHRI_CORE, wins=18, red_measures=MAGIC_HEAVY)
+    games.games(AHRI, ZED, 29, AHRI_CORE, wins=18, red_measures=MAGIC_HEAVY)
     games.done()
 
     answer = situational_items(games.conn, AHRI, "MIDDLE", ZED, [904, 905, 906, 907])
 
     assert _keys(answer.triggered) == ["magic"]
+    assert answer.thin_sample is True
     assert answer.profile.partial is False
     names = [s.item.item_id for s in answer.suggestions]
     # Ahri at 11: 1600 HP, 45 MR. Mercs +20 MR / 1250 g = 256; Banshee +40 / 3000 g = 213.3
@@ -110,7 +116,8 @@ def test_evidence_appears_at_30_games(games):
     assert (ev.games, ev.wins) == (30, 18)
     assert ev.win_rate == pytest.approx(0.6)
     assert ev.condition_text == "comps with at least 55% magic damage"
-    assert by_item[MERCS].evidence is None
+    assert MERCS not in by_item          # 30 full-core games and Ahri never bought Mercs
+    assert answer.thin_sample is False
     assert answer.class_evidence["magic"].games == 30
 
 
@@ -170,3 +177,121 @@ def test_situational_rejects_bad_enemy_lists(games):
         situational_items(games.conn, AHRI, "MIDDLE", AHRI, [])
     with pytest.raises(ValidationError):
         situational_items(games.conn, AHRI, "MIDDLE", ZED, [777777])
+
+
+# --- candidate pipeline: evidence first, only what the champion buys ---------
+
+def _armor_items(conn):
+    f.item(conn, THORNMAIL, "Thornmail", armor=75, health=350, gold_cost=2450)
+    f.item(conn, RANDUINS, "Randuin's Omen", armor=75, health=350, gold_cost=2700)
+
+
+def _rule_ids(answer, key):
+    return [s.item.item_id for s in answer.suggestions if s.rule.key == key]
+
+
+def test_armor_rule_keeps_only_items_the_champion_completes(games):
+    _armor_items(games.conn)
+    games.games(AHRI, ZED, 40, ZHONYA_CORE, wins=22, red_measures=PHYSICAL_HEAVY)
+    games.done()
+
+    answer = situational_items(games.conn, AHRI, "MIDDLE", ZED, [])
+
+    assert "physical" in _keys(answer.triggered)
+    assert _rule_ids(answer, "physical") == [ZHONYAS]
+    assert answer.suggestions[0].evidence.games == 40
+    assert answer.thin_sample is False
+    assert "physical" not in answer.rule_notes
+
+
+def test_evidence_backed_items_rank_before_higher_scoring_stat_only_items(games):
+    _armor_items(games.conn)
+    games.games(AHRI, ZED, 40, ZHONYA_CORE, red_measures=PHYSICAL_HEAVY)
+    games.games(AHRI, ZED, 5, [LUDENS, THORNMAIL, DEATHCAP], red_measures=PHYSICAL_HEAVY)
+    games.done()
+
+    answer = situational_items(games.conn, AHRI, "MIDDLE", ZED, [])
+
+    physical = [s for s in answer.suggestions if s.rule.key == "physical"]
+    assert [s.item.item_id for s in physical] == [ZHONYAS, THORNMAIL]
+    assert physical[1].score > physical[0].score
+    assert physical[1].evidence is None
+
+
+def test_rule_note_when_every_suggestion_is_stat_only(games):
+    games.games(AHRI, ZED, 40, AHRI_CORE[:1] + [ZHONYAS, DEATHCAP], red_measures=MAGIC_HEAVY)
+    games.games(AHRI, ZED, 5, AHRI_CORE, red_measures=MAGIC_HEAVY)
+    games.done()
+
+    answer = situational_items(games.conn, AHRI, "MIDDLE", ZED, [])
+
+    assert _rule_ids(answer, "magic") == [BANSHEES]
+    assert answer.rule_notes["magic"] == (
+        "None of these has 30 Ahri games behind it; ordered by the stat model only.")
+
+
+def test_thin_champion_gets_full_stat_only_list(games):
+    _armor_items(games.conn)
+    games.games(AHRI, ZED, 10, ZHONYA_CORE, red_measures=PHYSICAL_HEAVY)
+    games.done()
+
+    answer = situational_items(games.conn, AHRI, "MIDDLE", ZED, [])
+
+    physical = _rule_ids(answer, "physical")
+    assert set(physical) == {THORNMAIL, RANDUINS, ZHONYAS}
+    assert all(s.evidence is None for s in answer.suggestions)
+    assert answer.thin_sample is True
+    assert answer.rule_notes == {}
+
+
+def test_at_most_five_suggestions_per_rule_after_filtering(games):
+    for n in range(7):
+        f.item(games.conn, 5000 + n, f"Plate {n}", armor=20 + n, gold_cost=2000)
+    games.games(AHRI, ZED, 10, ZHONYA_CORE, red_measures=PHYSICAL_HEAVY)
+    games.done()
+
+    answer = situational_items(games.conn, AHRI, "MIDDLE", ZED, [])
+
+    assert len(_rule_ids(answer, "physical")) == 5
+
+
+# --- evidence sentence grammar ------------------------------------------------
+
+def test_every_condition_text_is_a_noun_phrase_after_faced():
+    profile = _profile(healing_pm_p75=801.4, cc_pm_p75=21.6)
+    zed = ChampionRef(238, "Zed", "Zed")
+    assert condition_text("magic", profile, zed) == "comps with at least 55% magic damage"
+    assert condition_text("physical", profile, zed) == "comps with at least 55% physical damage"
+    assert condition_text("healing", profile, zed) == "comps healing more than 801 per minute"
+    assert condition_text("cc", profile, zed) == (
+        "comps with more than 21.6 s of crowd control per minute")
+    assert condition_text("pen", profile, zed, "physical") == (
+        "lane opponents with at least 60 armor at level 11")
+    assert condition_text("pen", profile, zed, "magic") == (
+        "lane opponents with at least 60 magic resist at level 11")
+
+
+def test_rule_note_when_champion_never_completed_the_class(games):
+    games.games(AHRI, ZED, 40, ZHONYA_CORE, red_measures=MAGIC_HEAVY)
+    games.done()
+
+    answer = situational_items(games.conn, AHRI, "MIDDLE", ZED, [])
+
+    assert _keys(answer.triggered) == ["magic"]
+    assert _rule_ids(answer, "magic") == []
+    assert answer.rule_notes["magic"] == (
+        "Ahri never completed a magic resist item at mid in this dataset.")
+
+
+def test_one_off_purchase_does_not_put_an_item_in_the_pool(games):
+    # 40 Ahri games; Zhonya's in every core, Mercury's Treads completed exactly once.
+    games.games(AHRI, ZED, 39, [LUDENS, ZHONYAS, DEATHCAP], wins=20, red_measures=PHYSICAL_HEAVY)
+    games.games(AHRI, ZED, 1, [LUDENS, ZHONYAS, DEATHCAP, MERCS], wins=1, red_measures=PHYSICAL_HEAVY)
+    games.done()
+
+    answer = situational_items(games.conn, AHRI, "MIDDLE", ZED, [])
+
+    items = [s.item.item_id for s in answer.suggestions]
+    assert ZHONYAS in items
+    assert MERCS not in items
+    assert answer.thin_sample is False

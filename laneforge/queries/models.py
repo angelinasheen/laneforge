@@ -166,6 +166,10 @@ class SituationalAnswer:
     triggered: tuple[Rule, ...]
     suggestions: tuple[Suggestion, ...]
     class_evidence: dict[str, Evidence] = field(default_factory=dict)   # rule key -> class-level line
+    thin_sample: bool = False    # champion has < MIN_GAMES full-core games at this role, so
+                                 # every list is stat-model only; the UI says so once
+    rule_notes: dict[str, str] = field(default_factory=dict)   # rule key -> one sentence, e.g.
+                                 # "None of these has 30 Ahri games behind it; ..."
 
 
 # --- saved builds -----------------------------------------------------------
@@ -278,6 +282,7 @@ class ItemChampionUse:
     games: int                   # full-core participants whose first three include the item
     wins: int
     win_rate: float
+    sufficient: bool = True      # games >= MIN_GAMES
 
 
 @dataclass(frozen=True)

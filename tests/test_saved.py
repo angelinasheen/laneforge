@@ -117,11 +117,11 @@ def test_writes_to_missing_build_raise(setup):
     (dict(item_ids=[LUDENS, MERCS, DEATHCAP]), "not a legendary"),
     (dict(item_ids=[LUDENS, 1, DEATHCAP]), "Unknown item"),
     (dict(enemy_champion_ids=[900, 901, 902, 903, 904]), "at most 4"),
-    (dict(enemy_champion_ids=[ZED]), "lane opponent"),
-    (dict(enemy_champion_ids=[AHRI]), "own champion"),
-    (dict(enemy_champion_ids=[900, 900]), "only once"),
-    (dict(enemy_champion_ids=[555555]), "Unknown champion"),
-    (dict(opponent_champion_id=AHRI, enemy_champion_ids=[]), "different champions"),
+    (dict(enemy_champion_ids=[ZED]), "The lane opponent is already in the comp"),
+    (dict(enemy_champion_ids=[AHRI]), "Your champion can't also be an enemy"),
+    (dict(enemy_champion_ids=[900, 900]), "Name each enemy champion only once"),
+    (dict(enemy_champion_ids=[555555]), "We don't have that champion"),
+    (dict(opponent_champion_id=AHRI, enemy_champion_ids=[]), "can't also be the lane opponent"),
     (dict(name="   "), "Build name"),
     (dict(name="x" * 61), "Build name"),
     (dict(notes="x" * 2001), "Notes"),
@@ -149,3 +149,40 @@ def test_trigger_violation_becomes_validation_error(setup):
         with saved._write(conn):
             conn.execute(saved.SQL_INSERT_ENEMY, {"build_id": build_id, "champion_id": 904})
     assert len(saved.get_build(conn, build_id).enemies) == 4
+
+
+def test_observed_build_carries_its_matchup_row(setup):
+    conn, user_id = setup
+    games = GameMaker(conn, prefix="NA1_OBS")
+    games.games(AHRI, ZED, 30, CORE, wins=18)
+    games.games(AHRI, ZED, 8, [LUDENS, ZHONYAS, VOID])
+    games.games(AHRI, LUX, 5, CORE)                  # other matchup: not counted
+    games.done()
+
+    build = saved.get_build(conn, _create(conn, user_id))
+
+    row = build.observed
+    assert [i.item_id for i in row.items] == CORE
+    assert (row.games, row.wins, row.sufficient) == (32, 18, True)
+    assert row.pick_rate == pytest.approx(32 / 40)
+    assert row.win_rate == pytest.approx(18 / 32)
+    assert row.ci_low < row.win_rate < row.ci_high
+    assert saved.list_builds(conn, user_id)[0].observed == row
+
+
+def test_customized_build_has_no_observed_row(setup):
+    conn, user_id = setup
+    build_id = _create(conn, user_id)
+    saved.update_items(conn, build_id, [DEATHCAP, LUDENS, SHADOWFLAME])
+
+    assert saved.get_build(conn, build_id).observed is None
+    assert saved.get_build(conn, _create(conn, user_id, name="b", observed=False)).observed is None
+
+
+def test_observed_sequence_absent_from_this_matchup_has_no_row(setup):
+    conn, user_id = setup
+    build_id = _create(conn, user_id, opponent_champion_id=LUX, enemy_champion_ids=[])
+
+    build = saved.get_build(conn, build_id)
+
+    assert build.is_customized is False and build.observed is None

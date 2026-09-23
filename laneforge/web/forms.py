@@ -11,6 +11,10 @@ from laneforge.queries.validate import (
     MAX_ENEMIES, require_distinct_matchup, require_enemies, require_role,
 )
 
+CHAMPION_MESSAGE = "Pick a champion from the list."
+OPPONENT_MESSAGE = "Pick a lane opponent from the list."
+ENEMY_MESSAGE = "Pick each enemy champion from the list."
+
 LABEL_TO_ROLE = {label.upper(): role for role, label in ROLE_LABELS.items()}
 MAX_ID = 2**31 - 1
 
@@ -42,6 +46,14 @@ def parse_int(value, label: str) -> int:
     return number
 
 
+def parse_choice(value, message: str) -> int:
+    """A select-list id; any malformed value gets the one human message."""
+    try:
+        return parse_int(value, "choice")
+    except ValidationError:
+        raise ValidationError(message) from None
+
+
 def parse_role(value) -> str:
     text = (value or "").strip().upper()
     return require_role(LABEL_TO_ROLE.get(text, text) if text not in ROLES else text)
@@ -52,14 +64,14 @@ def parse_enemies(values) -> tuple[int, ...]:
     checked before any value is parsed so a flood of repeated fields costs nothing."""
     present = [v for v in values if (v or "").strip()]
     if len(present) > MAX_ENEMIES:
-        raise ValidationError(f"At most {MAX_ENEMIES} other enemy champions can be named.")
-    return tuple(parse_int(v, "enemy champion") for v in present)
+        raise ValidationError(f"Name at most {MAX_ENEMIES} other enemy champions.")
+    return tuple(parse_choice(v, ENEMY_MESSAGE) for v in present)
 
 
 def parse_matchup(args) -> MatchupQuery:
-    champion_id = parse_int(args.get("champion"), "champion")
+    champion_id = parse_choice(args.get("champion"), CHAMPION_MESSAGE)
     role = parse_role(args.get("role"))
-    opponent_id = parse_int(args.get("opponent"), "lane opponent")
+    opponent_id = parse_choice(args.get("opponent"), OPPONENT_MESSAGE)
     require_distinct_matchup(champion_id, opponent_id)
     enemies = require_enemies(champion_id, opponent_id, parse_enemies(args.getlist("enemy")))
     return MatchupQuery(champion_id, role, opponent_id, enemies)

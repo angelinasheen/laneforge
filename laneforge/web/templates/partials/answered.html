@@ -1,25 +1,38 @@
 {#- The trust line. Included by matchup.html (full render) and by
-    partials/core.html as an out-of-band swap when fetched by htmx. -#}
+    partials/core.html as an out-of-band swap when fetched by htmx.
+    `ladder.answered` is False when no level's leading row reached 30 games:
+    then no step is marked as the answer and the line says so plainly. -#}
 {%- set levels = [
   ('matchup', 'sequence', 'vs ' ~ opponent.name ~ ', in order'),
   ('matchup', 'item', 'vs ' ~ opponent.name ~ ', item by item'),
   ('champion', 'sequence', 'all opponents, in order'),
   ('champion', 'item', 'all opponents, item by item'),
 ] %}
+{%- set answered = ladder.answered is not defined or ladder.answered %}
 <div id="answered" class="answered-wrap" aria-live="polite"{% if oob %} hx-swap-oob="innerHTML"{% endif %}>
-  <p class="answered">
+  {%- if ladder.sample_size == 0 %}
+  <p class="answered unanswered"><span class="lvl">no level reached 30 games</span></p>
+  {%- else %}
+  <p class="answered{% if not answered %} unanswered{% endif %}">
+    {%- if answered %}
     <span class="lvl">answered at level {{ ladder.level }}</span>
+    {%- else %}
+    <span class="lvl">no level reached 30 games</span>
+    {%- endif %}
     <span class="at">{{ 'matchup' if ladder.scope == 'matchup' else 'all opponents' }} · {{ 'ordered sequence' if ladder.granularity == 'sequence' else 'per item' }} · <span class="num">{{ ladder.sample_size|num }}</span> games</span>
   </p>
-  {%- if ladder.fell_back and ladder.fallback_note %}
-  <p class="fallback">{{ ladder.fallback_note }}.</p>
+  {%- if (ladder.fell_back or not answered) and ladder.fallback_note %}
+  <p class="fallback">{{ ladder.fallback_note }}{% if not ladder.fallback_note.endswith('.') %}.{% endif %}</p>
   {%- endif %}
   <ol class="ladder" aria-label="Answer levels, most specific first">
     {%- for scope, gran, text in levels %}
     {%- set n = loop.index %}
-    <li class="{% if n == ladder.level %}is-answer{% elif n < ladder.level %}is-skipped{% endif %}"{% if n == ladder.level %} aria-current="step"{% endif %}>
-      <span class="n">{{ n }}</span> {{ text }}{% if n < ladder.level %}<span class="visually-hidden"> (too few games)</span>{% endif %}
+    {%- set is_answer = answered and n == ladder.level %}
+    {%- set skipped = n < ladder.level or (not answered and n == ladder.level) %}
+    <li class="{% if is_answer %}is-answer{% elif skipped %}is-skipped{% endif %}"{% if is_answer %} aria-current="step"{% endif %}>
+      <span class="n">{{ n }}</span> {{ text }}{% if skipped %}<span class="visually-hidden"> (too few games)</span>{% endif %}
     </li>
     {%- endfor %}
   </ol>
+  {%- endif %}
 </div>

@@ -72,3 +72,30 @@ def test_item_usage_counts_core_appearances(conn):
     assert usage.top_champions[0].champion.name == "Ahri"
     assert usage.top_champions[0].role == "MIDDLE"
     assert usage.saved_builds == 0
+    assert usage.top_champions[0].sufficient is False
+
+
+def test_item_usage_marks_champions_with_30_games_sufficient(conn):
+    seed_catalogue(conn, {AHRI: "Ahri", ZED: "Zed"})
+    games = GameMaker(conn)
+    games.games(AHRI, ZED, 30, [LUDENS, SHADOWFLAME, DEATHCAP])
+    games.done()
+
+    usage = catalog.item_usage(conn, catalog.get_item(conn, SHADOWFLAME))
+
+    assert usage.top_champions[0].games == 30 and usage.top_champions[0].sufficient is True
+
+
+def test_item_list_hides_free_items_and_collapses_duplicate_names(conn):
+    f.item(conn, 3599, "Kalista's Black Spear", is_legendary=False, gold_cost=0)
+    f.item(conn, 3600, "Kalista's Black Spear", is_legendary=False, gold_cost=0)
+    f.item(conn, 1102, "Gustwalker Hatchling", is_legendary=False, gold_cost=450)
+    f.item(conn, 1106, "Gustwalker Hatchling", is_legendary=False, gold_cost=450)
+    f.item(conn, 3340, "Stealth Ward", is_legendary=False, gold_cost=0)
+    f.item(conn, LUDENS, "Luden's Companion", gold_cost=2900)
+
+    listed = [(i.item_id, i.name) for i in catalog.list_items(conn)]
+
+    assert listed == [(1102, "Gustwalker Hatchling"), (LUDENS, "Luden's Companion")]
+    assert catalog.get_item(conn, 3600).name == "Kalista's Black Spear"
+    assert catalog.get_item(conn, 1106) is not None

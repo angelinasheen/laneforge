@@ -5,7 +5,7 @@
 {%- set qs = (query_string or '')|replace('?', '', 1) %}
 <article class="dossier">
   <header class="dossier-head">
-    <p class="kicker">Dossier <span class="num">{{ champion.champion_id }}-{{ role }}-{{ opponent.champion_id }}</span>{% if dataset and dataset.patch %} · patch <span class="num">{{ dataset.patch }}</span>{% endif %}</p>
+    <p class="kicker">Dossier{% if dataset and dataset.patch %} · patch <span class="num">{{ dataset.patch }}</span>{% endif %} · <a class="kicker-link" href="/?{{ qs }}">change matchup</a></p>
     <div class="headline-row">
       <span class="portraits" aria-hidden="true">{{ m.champ_icon(champion, 64, false, '') }}{{ m.champ_icon(opponent, 64, false, '') }}</span>
       <h1 class="headline">{{ champion.name }} <span class="sep">·</span> {{ role|role_label }} <span class="sep">·</span> <span class="vs">vs</span> {{ opponent.name }}</h1>

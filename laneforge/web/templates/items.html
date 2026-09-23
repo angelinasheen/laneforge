@@ -4,7 +4,7 @@
 {% block content %}
 <header class="page-head">
   <h1 class="headline">Items</h1>
-  <p class="lede-small">The Summoner’s Rift catalogue for this patch. <abbr title="legendary">L</abbr> marks a legendary, the only items that count toward a core build; <abbr title="boots">B</abbr> marks boots. Click a column heading to sort.</p>
+  <p class="lede-small">The Summoner’s Rift catalogue for this patch. <span class="kind">legendary</span> items are the only ones that count toward a core build. Click a column heading to sort.</p>
 </header>
 {%- if items %}
 <div class="table-scroll">
@@ -20,7 +20,7 @@
     <tr data-name="{{ it.name|lower }}" data-gold="{{ it.gold_cost }}" data-kind="{{ 'a' if it.is_legendary and not it.is_boots else ('b' if it.is_boots else 'c') }}">
       <th scope="row"><a class="with-icon" href="/items/{{ it.item_id }}">{{ m.item_icon(it, 24, loop.index > 30) }}{{ it.name }}</a></th>
       <td class="n num">{{ it.gold_cost|gold }}</td>
-      <td class="marker">{% if it.is_boots %}<abbr class="tag" title="boots">B</abbr>{% elif it.is_legendary %}<abbr class="tag tag-ox" title="legendary">L</abbr>{% endif %}</td>
+      <td class="marker">{% if it.is_boots %}<span class="kind">boots</span>{% elif it.is_legendary %}<span class="kind">legendary</span>{% endif %}</td>
       <td>{{ m.stat_line(it) }}</td>
     </tr>
   {%- endfor %}

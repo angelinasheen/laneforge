@@ -40,19 +40,24 @@
       {%- if current_user %}
         <span class="who">{{ current_user.display_name }}</span>
         <form method="post" action="/signout" class="inline"><button type="submit" class="link">Sign out</button></form>
-      {%- else %}
-        <a href="/signin?next={{ request.full_path|urlencode }}" {% if here.startswith('/signin') %}aria-current="page"{% endif %}>Sign in</a>
+      {%- elif not here.startswith('/signin') %}
+        <a href="/signin?next={{ request.full_path|urlencode }}">Sign in</a>
       {%- endif %}
     </div>
   </nav>
 </header>
-{% with messages = get_flashed_messages() %}
+{#- Flash messages. Errors ("error" category) read "Not saved:" in ink;
+    build.html overrides this block to show errors beside its swap form. -#}
+{% block notices %}{% with messages = get_flashed_messages(with_categories=true) %}
   {%- if messages %}
   <div class="notice" role="status">
-    {%- for m in messages %}<p>{{ m }}</p>{% endfor %}
+    {%- for category, m in messages %}
+    {%- if category == 'error' %}<p class="notice-error"><strong>Not saved:</strong> {{ m }}</p>
+    {%- else %}<p>{{ m }}</p>{% endif %}
+    {%- endfor %}
   </div>
   {%- endif %}
-{% endwith %}
+{% endwith %}{% endblock %}
 <main id="main">
 {% block content %}{% endblock %}
 </main>

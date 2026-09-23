@@ -51,3 +51,31 @@ SELECT build_id, item_id, position FROM build_item
 WHERE build_id = ANY(%(ids)s)
 ORDER BY build_id, position
 """
+
+# The level-1 ladder row for each uncustomized build: games with exactly this
+# first-three sequence in the build's matchup, over that matchup's full-core
+# participants. One query for any number of builds.
+SQL_OBSERVED_ROWS = """
+WITH b AS (
+  SELECT sb.build_id, sb.champion_id, sb.role, sb.opponent_champion_id,
+         MAX(CASE WHEN bi.position = 1 THEN bi.item_id END) AS item1,
+         MAX(CASE WHEN bi.position = 2 THEN bi.item_id END) AS item2,
+         MAX(CASE WHEN bi.position = 3 THEN bi.item_id END) AS item3
+  FROM saved_build sb
+  JOIN build_item bi ON bi.build_id = sb.build_id
+  WHERE sb.build_id = ANY(%(ids)s) AND NOT sb.is_customized
+  GROUP BY sb.build_id, sb.champion_id, sb.role, sb.opponent_champion_id
+)
+SELECT b.build_id,
+       COUNT(*) FILTER (WHERE pc.item1 = b.item1 AND pc.item2 = b.item2
+                          AND pc.item3 = b.item3)                     AS games,
+       COUNT(*) FILTER (WHERE pc.item1 = b.item1 AND pc.item2 = b.item2
+                          AND pc.item3 = b.item3 AND pc.won)          AS wins,
+       COUNT(pc.match_id)                                             AS sample_size
+FROM b
+LEFT JOIN participant_core pc
+  ON pc.champion_id = b.champion_id AND pc.role = b.role
+ AND pc.opponent_champion_id = b.opponent_champion_id
+ AND pc.legendary_completions >= %(full_core)s
+GROUP BY b.build_id
+"""

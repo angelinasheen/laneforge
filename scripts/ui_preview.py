@@ -12,6 +12,7 @@ Champion and item names and stats come from the checked-in Data Dragon files
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import sys
@@ -222,6 +223,46 @@ def ladder_level4() -> LadderAnswer:
                         rows=rows)
 
 
+def ladder_unanswered() -> LadderAnswer:
+    """No level's leading row reached 30 games: the trust line must say so."""
+    n = 41
+    rows = tuple(build_row((i,), g, w, n) for i, g, w in
+                 ((LUDENS, 22, 12), (RABADON, 17, 8), (ZHONYA, 9, 5), (SHADOWFLAME, 2, 1), (BANSHEE, 1, 1)))
+    return _ladder(level=4, scope="champion", granularity="item", sample_size=n,
+                   label="all opponents: 41 games", fell_back=True,
+                   fallback_note="not enough games at any level; showing per-item shares for Ahri, "
+                                 "support, all opponents", rows=rows, answered=False)
+
+
+def ladder_empty() -> LadderAnswer:
+    """No games at all for the champion in the role."""
+    return _ladder(level=4, scope="champion", granularity="item", sample_size=0,
+                   label="all opponents: 0 games", fell_back=True,
+                   fallback_note="not enough games at any level", rows=(), answered=False)
+
+
+def _ladder(**kwargs) -> LadderAnswer:
+    """LadderAnswer, tolerating a models.py that predates the `answered` field."""
+    names = {f.name for f in dataclasses.fields(LadderAnswer)}
+    return LadderAnswer(**{k: v for k, v in kwargs.items() if k in names})
+
+
+def _situational_cls():
+    """SituationalAnswer with thin_sample / rule_notes, whether or not the query
+    layer has added them yet (a frozen subclass fills the gap)."""
+    names = {f.name for f in dataclasses.fields(SituationalAnswer)}
+    if {"thin_sample", "rule_notes"} <= names:
+        return SituationalAnswer
+    extra = [("thin_sample", bool, dataclasses.field(default=False)),
+             ("rule_notes", dict, dataclasses.field(default_factory=dict))]
+    extra = [e for e in extra if e[0] not in names]
+    return dataclasses.make_dataclass("SituationalAnswer", extra, bases=(SituationalAnswer,), frozen=True)
+
+
+def situational(**kwargs) -> SituationalAnswer:
+    return _situational_cls()(**kwargs)
+
+
 def evidence(games: int, wins: int, condition: str) -> Evidence:
     lo, hi = wilson(wins, games)
     return Evidence(games=games, wins=wins, win_rate=wins / games, ci_low=lo, ci_high=hi,
@@ -243,21 +284,35 @@ def situational_full() -> SituationalAnswer:
                member("Darius", "champion", None, (520, 12, 186), 598, 2.4))
     profile = CompProfile(magic_share=0.13, physical_share=0.74, true_share=0.13, healing_pm=1027.0,
                           cc_pm=18.3, healing_pm_p75=842.0, cc_pm_p75=21.6, partial=False, members=members)
-    physical = Rule(key="physical", reason="comp is 74% physical", item_class="armor")
-    healing = Rule(key="healing", reason="comp heals 1,027 per minute, above the 75th percentile of 842",
-                   item_class="anti-heal")
+    physical = Rule(key="physical", reason="The comp is 74% physical damage", item_class="armor")
+    healing = Rule(key="healing", reason="The comp heals 1,027 per minute, above the 75th percentile "
+                                         "of comps (842)", item_class="anti-heal")
+    pen = Rule(key="pen", reason="Zed has 79 armor at level 11", item_class="magic penetration")
     cond_p = "comps with at least 55% physical damage"
-    cond_h = "comps healing above the 75th percentile"
+    cond_h = "comps healing more than 842 per minute"
     suggestions = (
         Suggestion(item=item(STEELCAPS), rule=physical, score=1412.0,
-                   score_text="+1,412 eHP per 1,000 gold", evidence=None),
+                   score_text="+1,412 effective HP per 1,000 gold", evidence=None),
         Suggestion(item=item(ZHONYA), rule=physical, score=611.0,
-                   score_text="+611 eHP per 1,000 gold", evidence=evidence(236, 131, cond_p)),
+                   score_text="+611 effective HP per 1,000 gold", evidence=evidence(236, 131, cond_p)),
         Suggestion(item=item(MORELLO), rule=healing, score=433.0,
-                   score_text="+433 eHP per 1,000 gold, cuts healing 40%", evidence=evidence(97, 52, cond_h)),
+                   score_text="+433 effective HP per 1,000 gold", evidence=evidence(97, 52, cond_h)),
+        Suggestion(item=item(SHADOWFLAME), rule=pen, score=0.18, score_text="+18% damage to Zed", evidence=None),
+        Suggestion(item=item(3135), rule=pen, score=0.15, score_text="+15% damage to Zed", evidence=None),
     )
-    return SituationalAnswer(profile=profile, triggered=(physical, healing), suggestions=suggestions,
-                             class_evidence={"physical": evidence(388, 206, cond_p)})
+    return situational(profile=profile, triggered=(physical, healing, pen), suggestions=suggestions,
+                       class_evidence={"physical": evidence(388, 206, cond_p)},
+                       rule_notes={"pen": "Ahri finished none of these in 30 or more games against high-armor "
+                                          "lane opponents, so they are ordered by the stat model alone."})
+
+
+def situational_thin() -> SituationalAnswer:
+    """Ahri at Support: under 30 games, so every rule is stat-model only."""
+    base = situational_full()
+    notes = {}      # the query layer sends no notes when the whole answer is thin
+    return situational(profile=base.profile, triggered=base.triggered,
+                       suggestions=tuple(dataclasses.replace(s, evidence=None) for s in base.suggestions),
+                       class_evidence={}, thin_sample=True, rule_notes=notes)
 
 
 def situational_partial() -> SituationalAnswer:
@@ -267,20 +322,20 @@ def situational_partial() -> SituationalAnswer:
                member("Galio", "champion", None, (61, 590, 14), 44, 11.2))
     profile = CompProfile(magic_share=0.61, physical_share=0.31, true_share=0.08, healing_pm=144.0,
                           cc_pm=22.1, healing_pm_p75=842.0, cc_pm_p75=21.6, partial=True, members=members)
-    magic = Rule(key="magic", reason="comp is 61% magic", item_class="magic resist")
-    cc = Rule(key="cc", reason="comp applies 22.1 s of crowd control per minute, above the 75th percentile of 21.6",
-              item_class="tenacity")
+    magic = Rule(key="magic", reason="The comp is 61% magic damage", item_class="magic resist")
+    cc = Rule(key="cc", reason="The comp deals 22.1 s of crowd control per minute, above the 75th "
+                               "percentile of comps (21.6 s)", item_class="tenacity")
     cond = "comps with at least 55% magic damage"
     suggestions = (
-        Suggestion(item=item(BANSHEE), rule=magic, score=842.0, score_text="+842 eHP per 1,000 gold",
+        Suggestion(item=item(BANSHEE), rule=magic, score=842.0, score_text="+842 effective HP per 1,000 gold",
                    evidence=evidence(164, 89, cond)),
-        Suggestion(item=item(MERCS), rule=magic, score=790.0, score_text="+790 eHP per 1,000 gold",
+        Suggestion(item=item(MERCS), rule=magic, score=790.0, score_text="+790 effective HP per 1,000 gold",
                    evidence=None),
         Suggestion(item=item(MERCS), rule=cc, score=30.0, score_text="30% tenacity for 1,250 gold",
                    evidence=evidence(58, 31, "comps with crowd control above the 75th percentile")),
     )
-    return SituationalAnswer(profile=profile, triggered=(magic, cc), suggestions=suggestions,
-                             class_evidence={"magic": evidence(301, 160, cond)})
+    return situational(profile=profile, triggered=(magic, cc), suggestions=suggestions,
+                       class_evidence={"magic": evidence(301, 160, cond)})
 
 
 def enemies_full() -> tuple[ChampionRef, ...]:
@@ -304,7 +359,8 @@ def saved_builds() -> list[SavedBuild]:
         SavedBuild(build_id=7, user=user, name="Ahri vs Zed, Luden’s first", notes=None,
                    champion=champ("Ahri"), role="MIDDLE", opponent=champ("Zed"), enemies=enemies_full(),
                    items=tuple(item(i) for i in observed), is_customized=False,
-                   created_at=T0 - timedelta(days=1, hours=3), stat_totals=totals(observed)),
+                   created_at=T0 - timedelta(days=1, hours=3), stat_totals=totals(observed),
+                   observed=build_row(observed, 58, 33, 212)),
     ]
 
 
@@ -361,11 +417,14 @@ def champion_overview() -> ChampionOverview:
         RoleStats(role="MIDDLE", games=2318, wins=1203, win_rate=1203 / 2318, physical_pm=41.0, magic_pm=716.0,
                   true_pm=58.0, healing_pm=92.0, cc_pm=4.1, profile_source="role"),
         RoleStats(role="UTILITY", games=24, wins=11, win_rate=11 / 24, physical_pm=22.0, magic_pm=455.0,
-                  true_pm=31.0, healing_pm=61.0, cc_pm=3.8, profile_source="champion"),
+                  true_pm=31.0, healing_pm=61.0, cc_pm=3.8, profile_source="champion", sufficient=False),
+        RoleStats(role="TOP", games=2, wins=1, win_rate=0.5, physical_pm=None, magic_pm=None,
+                  true_pm=None, healing_pm=None, cc_pm=None, profile_source="none", sufficient=False),
     )
     opponents = (("Zed", 212, 109), ("Syndra", 188, 91), ("Yasuo", 171, 94), ("Orianna", 149, 76),
                  ("Viktor", 133, 70), ("Akali", 97, 45), ("Katarina", 62, 34), ("Leblanc", 21, 8))
-    matchups = tuple(MatchupStat(opponent=champ(k), role="MIDDLE", games=g, wins=w, win_rate=w / g)
+    matchups = tuple(MatchupStat(opponent=champ(k), role="MIDDLE", games=g, wins=w, win_rate=w / g,
+                                 sufficient=g >= MIN_GAMES)
                      for k, g, w in opponents)
     return ChampionOverview(champion=ahri, games=2342, wins=1214, win_rate=1214 / 2342, by_role=by_role,
                             top_matchups=matchups)
@@ -374,7 +433,8 @@ def champion_overview() -> ChampionOverview:
 def item_usage() -> list:
     from types import SimpleNamespace as NS
     rows = (("Ahri", "MIDDLE", 1622, 842), ("Syndra", "MIDDLE", 1310, 671), ("Orianna", "MIDDLE", 988, 489),
-            ("Lux", "UTILITY", 402, 214), ("Viktor", "MIDDLE", 377, 185), ("Vex", "MIDDLE", 19, 9))
+            ("Lux", "UTILITY", 402, 214), ("Viktor", "MIDDLE", 377, 185), ("Vex", "MIDDLE", 19, 9),
+            ("Zoe", "MIDDLE", 1, 1))
     return [NS(champion=champ(k), role=r, games=g, wins=w, win_rate=w / g) for k, r, g, w in rows]
 
 
@@ -384,8 +444,8 @@ MATCHUP_QS = "champion=103&role=MIDDLE&opponent=238&enemy=64&enemy=222&enemy=412
 PARTIAL_QS = "champion=103&role=MIDDLE&opponent=238&enemy=99&enemy=3"
 
 
-def _matchup_ctx(ladder, situational, enemies, qs):
-    return {"champion": champ("Ahri"), "role": "MIDDLE", "opponent": champ("Zed"), "enemies": enemies,
+def _matchup_ctx(ladder, situational, enemies, qs, role="MIDDLE"):
+    return {"champion": champ("Ahri"), "role": role, "opponent": champ("Zed"), "enemies": enemies,
             "ladder": ladder, "situational": situational, "query_string": qs}
 
 
@@ -393,10 +453,22 @@ PAGES = {
     # name: (template, context factory, description, query string for request.args)
     "index": ("index.html", lambda: {"champions": all_champions(), "roles": list(ROLES), "dataset": dataset()},
               "Matchup form", "champion=103&role=MIDDLE&opponent=238"),
+    "index-error": ("index.html", lambda: {"champions": all_champions(), "roles": list(ROLES), "dataset": dataset(),
+                                           "form_error": "Pick two different champions: Ahri cannot be her own "
+                                                         "lane opponent."},
+                    "Matchup form after a failed GET /matchup, pre-filled", "champion=103&role=MIDDLE&opponent=103"),
     "index-empty": ("index.html", lambda: {"champions": all_champions(), "roles": list(ROLES),
                                            "dataset": dataset(empty=True)}, "Matchup form, no matches loaded", ""),
     "matchup": ("matchup.html", lambda: _matchup_ctx(ladder_level1(), situational_full(), enemies_full(), MATCHUP_QS),
                 "Dossier, level 1, rendered server-side (no-JS path)", MATCHUP_QS),
+    "matchup-unanswered": ("matchup.html", lambda: _matchup_ctx(ladder_unanswered(), situational_thin(), (),
+                                                                "champion=103&role=UTILITY&opponent=238", "UTILITY"),
+                           "Dossier, no level reached 30 games; thin sample, rule notes",
+                           "champion=103&role=UTILITY&opponent=238"),
+    "matchup-empty": ("matchup.html", lambda: _matchup_ctx(ladder_empty(), situational_thin(), (),
+                                                           "champion=103&role=BOTTOM&opponent=222", "BOTTOM"),
+                      "Dossier, no games at all for the champion in the role",
+                      "champion=103&role=BOTTOM&opponent=222"),
     "matchup-htmx": ("matchup.html", lambda: _matchup_ctx(None, None, enemies_full(), MATCHUP_QS),
                      "Dossier shell; blocks load over htmx from /matchup/core and /matchup/situational", MATCHUP_QS),
     "fallback": ("matchup.html", lambda: _matchup_ctx(ladder_level3(), situational_partial(),
@@ -422,7 +494,11 @@ PAGES = {
     "builds": ("builds.html", lambda: {"builds": saved_builds()}, "Saved builds", ""),
     "builds-empty": ("builds.html", lambda: {"builds": []}, "Saved builds, none yet", ""),
     "build": ("build.html", lambda: {"build": saved_builds()[0], "legendary_items": legendary_items()},
-              "Saved build page (with a flash message)", ""),
+              "Saved build page, customized (with a flash message)", ""),
+    "build-observed": ("build.html", lambda: {"build": saved_builds()[1], "legendary_items": legendary_items()},
+                       "Saved build page, observed, with its matchup row", ""),
+    "build-error": ("build.html", lambda: {"build": saved_builds()[0], "legendary_items": legendary_items()},
+                    "Saved build page after a rejected item swap (error flash)", ""),
     "base": ("base.html", lambda: {}, "Bare layout", ""),
     "400": ("errors/400.html", lambda: {"message": "Pick two different champions: Ahri cannot be her own lane opponent."},
             "400 page", ""),
@@ -453,12 +529,20 @@ def create_app() -> Flask:
         template, factory, _, _ = PAGES[name]
         if name == "build":
             flash("Items saved. The build is now marked customized.")
+        if name == "build-error":
+            flash("A build needs three different legendary items.", "error")
         status = int(name) if name.isdigit() else 200
         return render_template(template, **factory()), status
+
+    @app.get("/signin")
+    def preview_signin():
+        return render_template("signin.html")
 
     @app.get("/matchup/core")
     def partial_core():
         ladder = ladder_level1() if request.args.get("enemy") != "99" else ladder_level3()
+        if request.args.get("role") == "UTILITY":
+            ladder = ladder_unanswered()
         return render_template("partials/core.html", ladder=ladder, champion=champ("Ahri"), role="MIDDLE",
                                opponent=champ("Zed"))
 

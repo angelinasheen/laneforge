@@ -124,7 +124,8 @@ def test_matchup_page_shows_ladder_and_situational(client, data):
     response = client.get(f"/matchup?{MATCHUP}&enemy={LUX}")
     assert response.status_code == 200
     body = response.data.decode()
-    assert "Zed" in body and "Luden" in body and "Mercury" in body
+    assert "Zed" in body and "Luden" in body and "magic damage" in body
+    assert "Mercury" not in body      # 35 full-core Ahri games, never bought
 
 
 @needs_templates
@@ -135,24 +136,62 @@ def test_matchup_partials(client, data, path):
     assert b"<html" not in response.data
 
 
-@pytest.mark.parametrize("query", [
-    "champion=103&role=ADC&opponent=238",
-    "champion=103&role=MIDDLE",
-    "champion=103&role=MIDDLE&opponent=103",
-    "champion=424242&role=MIDDLE&opponent=238",
-    f"{MATCHUP}&enemy=238",
-    f"{MATCHUP}&enemy=900&enemy=901&enemy=902&enemy=903&enemy=904",
-    "champion=abc&role=MIDDLE&opponent=238",
-])
-@pytest.mark.parametrize("path", ["/matchup", "/matchup/core", "/matchup/situational"])
-def test_matchup_bad_input_is_400(client, data, path, query):
-    assert client.get(f"{path}?{query}").status_code == 400
+BAD_MATCHUPS = [
+    ("champion=103&role=ADC&opponent=238", "Pick a role."),
+    ("role=MIDDLE&opponent=238", "Pick a champion from the list."),
+    ("champion=103&role=MIDDLE", "Pick a lane opponent from the list."),
+    ("champion=103&role=MIDDLE&opponent=103", "Your champion can't also be the lane opponent."),
+    ("champion=424242&role=MIDDLE&opponent=238", "We don't have that champion."),
+    (f"{MATCHUP}&enemy=238", "The lane opponent is already in the comp."),
+    (f"{MATCHUP}&enemy=99&enemy=99", "Name each enemy champion only once."),
+    (f"{MATCHUP}&enemy=103", "Your champion can't also be an enemy."),
+    (f"{MATCHUP}&enemy=900&enemy=901&enemy=902&enemy=903&enemy=904",
+     "Name at most 4 other enemy champions."),
+    ("champion=abc&role=MIDDLE&opponent=238", "Pick a champion from the list."),
+    (f"{MATCHUP}&enemy=x", "Pick each enemy champion from the list."),
+]
+
+
+@pytest.fixture
+def rendered(app):
+    """(template name, context) for every template rendered during the test."""
+    from flask import template_rendered
+    seen = []
+
+    def record(sender, template, context, **extra):
+        seen.append((template.name, context))
+
+    template_rendered.connect(record, app)
+    yield seen
+    template_rendered.disconnect(record, app)
 
 
 @needs_templates
-def test_bad_input_page_explains(client, data):
-    response = client.get("/matchup?champion=103&role=ADC&opponent=238")
-    assert b"Pick a role" in response.data
+@pytest.mark.parametrize("query, message", BAD_MATCHUPS)
+def test_bad_matchup_rerenders_the_form_with_a_human_message(client, data, rendered,
+                                                              query, message):
+    response = client.get(f"/matchup?{query}")
+
+    assert response.status_code == 400
+    name, context = rendered[-1]
+    assert name == "index.html"
+    assert context["form_error"] == message
+    assert context["champions"] and context["roles"]
+
+
+@needs_templates
+def test_rerendered_form_keeps_the_submitted_values(client, data, rendered):
+    client.get(f"/matchup?champion={AHRI}&role=MIDDLE&opponent={AHRI}&enemy={LUX}")
+
+    _, context = rendered[-1]
+    args = context["request"].args
+    assert args["champion"] == str(AHRI) and args.getlist("enemy") == [str(LUX)]
+
+
+@pytest.mark.parametrize("query, message", BAD_MATCHUPS)
+@pytest.mark.parametrize("path", ["/matchup/core", "/matchup/situational"])
+def test_matchup_partials_bad_input_is_400(client, data, path, query, message):
+    assert client.get(f"{path}?{query}").status_code == 400
 
 
 @needs_templates

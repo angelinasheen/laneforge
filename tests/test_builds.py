@@ -95,7 +95,10 @@ def test_no_level_qualifies_returns_level_four_with_insufficient_rows(games):
     answer = core_builds(games.conn, AHRI, "MIDDLE", ZED)
 
     assert answer.level == 4 and answer.fell_back is True
-    assert "Not enough games at any level" in answer.fallback_note
+    assert answer.answered is False
+    assert answer.label == "all opponents: 5 games"
+    assert answer.fallback_note == ("No build reaches 30 games at any level; "
+                                    "showing what exists for Ahri, mid, all opponents")
     assert len(answer.rows) == 3
     assert all(not r.sufficient for r in answer.rows)
 
@@ -106,7 +109,27 @@ def test_champion_with_no_games_returns_empty_level_four(games):
     answer = core_builds(games.conn, ORIANNA, "MIDDLE", ZED)
 
     assert (answer.level, answer.sample_size, answer.rows) == (4, 0, ())
+    assert answer.answered is False
     assert answer.label == "all opponents: 0 games"
+    assert answer.fallback_note == "No Orianna games at mid in this dataset"
+
+
+def test_no_games_at_bot_says_so(games):
+    games.games(AHRI, ZED, 35, SEQ_A)
+    games.done()
+
+    answer = core_builds(games.conn, AHRI, "BOTTOM", ZED)
+
+    assert answer.answered is False
+    assert answer.fallback_note == "No Ahri games at bot in this dataset"
+
+
+def test_answered_levels_report_answered_true(games):
+    games.games(AHRI, ZED, 20, SEQ_A)
+    games.games(AHRI, SYNDRA, 15, SEQ_B)
+    games.done()
+
+    assert core_builds(games.conn, AHRI, "MIDDLE", ZED).answered is True
 
 
 def test_rows_ranked_by_pick_rate_not_win_rate(games):

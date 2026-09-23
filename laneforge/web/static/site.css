@@ -32,8 +32,8 @@
     --ink: #e9e4d8;
     --ink-2: #b0a999;
     --rule: #48433a;
-    --oxblood: #d8766a;      /* oxblood lifted so it clears AA on charcoal */
-    --oxblood-2: #e8958a;
+    --oxblood: #d27066;      /* lifted oxblood: 5.06:1 on #1e1c19, 4.54:1 on the #282520 stripe */
+    --oxblood-2: #e28a80;
     --moss: #93b98a;
     --mute: #6f6a60;
     --mute-ink: #948f82;
@@ -95,6 +95,13 @@ img { max-width: 100%; }
 .nav { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--s2) var(--s5);
   padding-block: var(--s2); border-bottom: 1px solid var(--rule); }
 .nav ul { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s5); list-style: none; margin: 0; padding: 0; }
+/* phones: sections and account share one wrapping row, so the nav takes
+   at most two lines ("Saved builds" and the account share the second) */
+@media (max-width: 600px) {
+  .nav { justify-content: flex-start; gap: var(--s1) var(--s3); font-size: .95rem; }
+  .nav ul { display: contents; }
+  .account { margin-left: auto; gap: var(--s2); }
+}
 .nav a { color: var(--ink); text-decoration: none; }
 .nav a:hover { color: var(--oxblood); }
 .nav a[aria-current="page"] { color: var(--oxblood); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .35em; }
@@ -102,13 +109,20 @@ img { max-width: 100%; }
 .account .who { font-style: italic; color: var(--ink-2); }
 form.inline { display: inline; margin: 0; }
 
-/* flash: one line of oxblood, no box */
+/* flash: one line of oxblood, no box; errors in ink roman */
 .notice { margin-top: var(--s3); color: var(--oxblood); font-style: italic; }
 .notice p { margin: 0; padding-left: var(--s3); border-left: 2px solid var(--oxblood); }
+.notice .notice-error, .form-error { color: var(--ink); font-style: normal; }
+.form-error { margin: var(--s2) 0 var(--s3); padding-left: var(--s3); border-left: 2px solid var(--oxblood); max-width: 62ch; }
+/* a note that qualifies an answer: ink italic on a 2px oxblood rule */
+.note-rule { color: var(--ink); font-style: italic; padding-left: var(--s3); border-left: 2px solid var(--oxblood); }
 
 /* shared headings ------------------------------------------------------------ */
 .kicker { font: .75rem/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); margin-bottom: var(--s2); }
 .kicker .num { font-size: 1em; }
+.kicker-link { text-transform: none; letter-spacing: 0; white-space: nowrap; }
+.nowrap { white-space: nowrap; }
+.num-display { font-variant-numeric: lining-nums tabular-nums; }
 .headline { font-size: clamp(2rem, 5.2vw, 3.3rem); letter-spacing: -.012em; font-variation-settings: "opsz" 144; }
 .headline .sep { color: var(--rule); font-weight: 400; }
 .headline .vs { margin-right: .12em; font-style: italic; font-weight: 400; color: var(--ink-2); }
@@ -133,6 +147,8 @@ form.inline { display: inline; margin: 0; }
   border: 1px solid currentColor; color: var(--ink-2); vertical-align: .15em;
 }
 .tag-ox { color: var(--oxblood); }
+/* item kind in the catalogue: mono small caps, no box */
+.kind { font: .8rem var(--mono); font-variant-caps: all-small-caps; letter-spacing: .06em; color: var(--ink-2); }
 .dagger { color: var(--oxblood); font-family: var(--display); font-weight: 600; }
 
 /* forms ----------------------------------------------------------------------- */
@@ -167,18 +183,23 @@ select option { color: var(--ink); background: var(--paper); }
 input[type="checkbox"] { accent-color: var(--oxblood); width: 1.05em; height: 1.05em; vertical-align: -.12em; }
 
 /* the sentence form */
-.sentence p:first-child { font: 400 clamp(1.4rem, 3.6vw, 2.1rem)/1.9 var(--display); margin-bottom: var(--s5); }
+.sentence .sentence-main { font: 400 clamp(1.4rem, 3.6vw, 2.1rem)/1.9 var(--display); margin-bottom: var(--s1); }
+.sentence .sentence-enemies { font: 400 clamp(1.15rem, 2.6vw, 1.5rem)/1.9 var(--display); margin-bottom: var(--s4); }
+.sentence .opt { font-size: .8em; }
 .sentence label, .sentence .joiner { color: var(--ink-2); font-style: italic; }
 .sentence select { font: 600 1em var(--display); color: var(--ink); max-width: 100%; padding-right: 16px; margin-inline: .12em; field-sizing: content; min-width: 2.5em; }
-.sentence select.enemy { font-size: .8em; min-width: 2.2em; }
-.sentence select.enemy:has(option[value=""]:checked) { font-weight: 400; color: var(--mute-ink); }
-.sentence select:invalid { color: var(--mute-ink); font-weight: 400; }
+.sentence select.enemy { min-width: 2.2em; }
+/* an unchosen field reads as a quiet placeholder, never as an error */
+.sentence select:has(option[value=""]:checked) { font-weight: 400; color: var(--ink-2); font-style: italic; }
+/* invalid only once the user has interacted or tried to submit */
+.sentence select:user-invalid, .sentence.tried select:invalid { border-bottom: 2px solid var(--oxblood); }
 .method { border-top: 1px solid var(--rule); padding-top: var(--s5); margin-top: var(--s6); }
 .method p { max-width: 68ch; }
 .colophon-table { border-top: 1px solid var(--rule); padding-top: var(--s5); margin-top: var(--s5); }
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--s3) var(--s5); margin: 0; }
 .facts dt { font-variant-caps: all-small-caps; letter-spacing: .08em; color: var(--ink-2); font-size: .92rem; }
 .facts dd { margin: 0; }
+.form-error strong, .notice-error strong { font-weight: 600; }
 
 /* tables ------------------------------------------------------------------------ */
 .table-scroll { overflow-x: auto; }

@@ -49,10 +49,10 @@ def test_flood_of_enemy_params_is_rejected_before_parsing(app):
     client = app.test_client()
     query = "champion=103&role=MIDDLE&opponent=238&" + "&".join(f"enemy={n}" for n in range(1, 41))
 
-    response = client.get(f"/matchup?{query}")
+    response = client.get(f"/matchup/core?{query}")
 
     assert response.status_code == 400
-    assert b"At most 4" in response.data
+    assert b"Name at most 4" in response.data
 
 
 @pytest.mark.parametrize("bad", ["../etc/passwd", "NA1_1/../x", "", "na1_123", "NA1-123"])

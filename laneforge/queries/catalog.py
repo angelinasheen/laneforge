@@ -5,7 +5,7 @@ from laneforge.queries._rows import (
     CHAMPION_COLUMNS, ITEM_COLUMNS, champion_from_row, item_from_row, load_champions, rate,
 )
 from laneforge.queries.models import (
-    ChampionRef, DatasetSummary, ItemChampionUse, ItemRef, ItemUsage,
+    MIN_GAMES, ChampionRef, DatasetSummary, ItemChampionUse, ItemRef, ItemUsage,
 )
 
 TIER_ORDER = ("IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD",
@@ -14,10 +14,20 @@ ITEM_TOP_CHAMPIONS = 10
 
 SQL_LIST_CHAMPIONS = f"SELECT {CHAMPION_COLUMNS} FROM champion ORDER BY name"
 SQL_GET_CHAMPION = f"SELECT {CHAMPION_COLUMNS} FROM champion WHERE champion_id = %(champion_id)s"
-SQL_LIST_ITEMS = f"SELECT {ITEM_COLUMNS} FROM item ORDER BY name, item_id"
-SQL_LIST_LEGENDARY_ITEMS = (
-    f"SELECT {ITEM_COLUMNS} FROM item WHERE is_legendary AND NOT is_boots ORDER BY name, item_id"
-)
+# The catalogue page: purchasable items only (no wards, trinkets or Kalista's
+# spear at 0 gold), one row per name (the lowest id wins, e.g. jungle pets).
+SQL_LIST_ITEMS = f"""
+SELECT DISTINCT ON (name) {ITEM_COLUMNS}
+FROM item
+WHERE gold_cost > 0
+ORDER BY name, item_id
+"""
+SQL_LIST_LEGENDARY_ITEMS = f"""
+SELECT DISTINCT ON (name) {ITEM_COLUMNS}
+FROM item
+WHERE is_legendary AND NOT is_boots AND gold_cost > 0
+ORDER BY name, item_id
+"""
 SQL_GET_ITEM = f"SELECT {ITEM_COLUMNS} FROM item WHERE item_id = %(item_id)s"
 
 # One round-trip; every aggregate is well-defined on empty tables.
@@ -93,7 +103,8 @@ def item_usage(conn, item: ItemRef) -> ItemUsage:
     champions = load_champions(conn, (r["champion_id"] for r in top))
     uses = tuple(
         ItemChampionUse(champion=champions[r["champion_id"]], role=r["role"], games=r["games"],
-                        wins=r["wins"], win_rate=rate(r["wins"], r["games"]))
+                        wins=r["wins"], win_rate=rate(r["wins"], r["games"]),
+                        sufficient=r["games"] >= MIN_GAMES)
         for r in top
     )
     return ItemUsage(item=item, completions=totals["completions"], core_games=core_games,

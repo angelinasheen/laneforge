@@ -93,8 +93,11 @@ comp_profile(conn, role, opponent_champion_id, enemy_champion_ids) -> CompProfil
 situational_items(conn, champion_id, role, opponent_champion_id, enemy_champion_ids) -> SituationalAnswer
 #   profile: CompProfile
 #   triggered: list[Rule]  (rule key, human reason e.g. "comp is 61% magic")
-#   suggestions: list[Suggestion] ordered by score desc within rule
-#   Suggestion: item: ItemRef, rule, score (float), score_text (e.g. '+1,420 eHP per 1,000 gold'),
+#   suggestions: list[Suggestion]; within each rule, evidence-backed items first then stat-only, each by score desc, max 5
+#   thin_sample: bool (champion has < 30 full-core games at the role: list unfiltered, say so once)
+#   rule_notes: dict[rule key -> sentence] when a rule's list is entirely stat-only or empty after filtering
+#   Candidate filter: with >= 30 games, only items the champion completed in >= 2% of games there (min 2)
+#   Suggestion: item: ItemRef, rule, score (float), score_text (e.g. '+1,420 effective HP per 1,000 gold' / '+17% damage to Zed'),
 #               evidence: Evidence | None  (games, wins, win_rate, ci_low, ci_high, condition_text)
 #   Rules (thresholds are constants in the module):
 #     magic_share >= 0.55     -> items with magic_resist > 0
@@ -183,7 +186,7 @@ Both must agree on template names and context variable names, listed here:
 | Template | Context |
 |---|---|
 | `base.html` | `current_user`, `dataset` (DatasetSummary) |
-| `index.html` | `champions`, `roles`, `dataset` |
+| `index.html` | `champions`, `roles`, `dataset`, `form_error` (str or None; set with status 400 when GET /matchup fails validation, form pre-filled from `request.args`) |
 | `matchup.html` | `champion`, `role`, `opponent`, `enemies`, `ladder`, `situational`, `query_string` |
 | `partials/core.html` | `ladder`, `champion`, `role`, `opponent` |
 | `partials/situational.html` | `situational`, `champion`, `role`, `opponent`, `enemies` |
