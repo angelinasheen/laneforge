@@ -6,3 +6,5 @@ data/raw/
 data/checkpoint*
 .pytest_cache/
 .DS_Store
+data/*.log
+data/seeds*
