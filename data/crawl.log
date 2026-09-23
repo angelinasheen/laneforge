@@ -1,0 +1,227 @@
+2026-09-22 23:17:46,123 INFO laneforge.ingest.seeds: GOLD IV page 1: 205 entries, 205 new seeds
+2026-09-22 23:17:46,388 INFO laneforge.ingest.seeds: GOLD IV page 2: 205 entries, 200 new seeds
+2026-09-22 23:17:46,826 INFO laneforge.ingest.seeds: GOLD IV page 3: 205 entries, 200 new seeds
+2026-09-22 23:17:47,105 INFO laneforge.ingest.seeds: GOLD IV page 4: 205 entries, 200 new seeds
+2026-09-22 23:17:47,373 INFO laneforge.ingest.seeds: GOLD IV page 5: 205 entries, 200 new seeds
+2026-09-22 23:17:47,628 INFO laneforge.ingest.seeds: GOLD III page 1: 205 entries, 205 new seeds
+2026-09-22 23:17:47,918 INFO laneforge.ingest.seeds: GOLD III page 2: 205 entries, 200 new seeds
+2026-09-22 23:17:48,272 INFO laneforge.ingest.seeds: GOLD III page 3: 205 entries, 200 new seeds
+2026-09-22 23:17:48,539 INFO laneforge.ingest.seeds: GOLD III page 4: 205 entries, 200 new seeds
+2026-09-22 23:17:48,818 INFO laneforge.ingest.seeds: GOLD III page 5: 205 entries, 200 new seeds
+2026-09-22 23:17:49,169 INFO laneforge.ingest.seeds: GOLD II page 1: 205 entries, 205 new seeds
+2026-09-22 23:17:49,793 INFO laneforge.ingest.seeds: GOLD II page 2: 205 entries, 200 new seeds
+2026-09-22 23:17:50,078 INFO laneforge.ingest.seeds: GOLD II page 3: 205 entries, 200 new seeds
+2026-09-22 23:17:50,357 INFO laneforge.ingest.seeds: GOLD II page 4: 205 entries, 200 new seeds
+2026-09-22 23:17:50,627 INFO laneforge.ingest.seeds: GOLD II page 5: 205 entries, 200 new seeds
+2026-09-22 23:17:50,902 INFO laneforge.ingest.seeds: GOLD I page 1: 205 entries, 205 new seeds
+2026-09-22 23:17:51,172 INFO laneforge.ingest.seeds: GOLD I page 2: 205 entries, 200 new seeds
+2026-09-22 23:17:51,497 INFO laneforge.ingest.seeds: GOLD I page 3: 205 entries, 200 new seeds
+2026-09-22 23:17:52,019 INFO laneforge.ingest.seeds: GOLD I page 4: 205 entries, 200 new seeds
+2026-09-22 23:17:52,301 INFO laneforge.ingest.seeds: GOLD I page 5: 205 entries, 200 new seeds
+2026-09-22 23:17:52,561 INFO laneforge.ingest.seeds: PLATINUM IV page 1: 205 entries, 205 new seeds
+2026-09-22 23:17:52,824 INFO laneforge.ingest.seeds: PLATINUM IV page 2: 205 entries, 200 new seeds
+2026-09-22 23:17:53,091 INFO laneforge.ingest.seeds: PLATINUM IV page 3: 205 entries, 200 new seeds
+2026-09-22 23:17:53,426 INFO laneforge.ingest.seeds: PLATINUM IV page 4: 205 entries, 200 new seeds
+2026-09-22 23:17:54,436 INFO laneforge.ingest.seeds: PLATINUM IV page 5: 205 entries, 200 new seeds
+2026-09-22 23:17:54,688 INFO laneforge.ingest.seeds: PLATINUM III page 1: 205 entries, 205 new seeds
+2026-09-22 23:17:54,950 INFO laneforge.ingest.seeds: PLATINUM III page 2: 205 entries, 200 new seeds
+2026-09-22 23:17:55,249 INFO laneforge.ingest.seeds: PLATINUM III page 3: 205 entries, 200 new seeds
+2026-09-22 23:17:55,519 INFO laneforge.ingest.seeds: PLATINUM III page 4: 205 entries, 200 new seeds
+2026-09-22 23:17:55,799 INFO laneforge.ingest.seeds: PLATINUM III page 5: 205 entries, 200 new seeds
+2026-09-22 23:17:56,039 INFO laneforge.ingest.seeds: PLATINUM II page 1: 205 entries, 205 new seeds
+2026-09-22 23:17:56,306 INFO laneforge.ingest.seeds: PLATINUM II page 2: 205 entries, 200 new seeds
+2026-09-22 23:17:56,567 INFO laneforge.ingest.seeds: PLATINUM II page 3: 205 entries, 200 new seeds
+2026-09-22 23:17:56,866 INFO laneforge.ingest.seeds: PLATINUM II page 4: 205 entries, 200 new seeds
+2026-09-22 23:17:57,357 INFO laneforge.ingest.seeds: PLATINUM II page 5: 205 entries, 200 new seeds
+2026-09-22 23:17:57,654 INFO laneforge.ingest.seeds: PLATINUM I page 1: 205 entries, 205 new seeds
+2026-09-22 23:17:57,911 INFO laneforge.ingest.seeds: PLATINUM I page 2: 205 entries, 200 new seeds
+2026-09-22 23:17:58,225 INFO laneforge.ingest.seeds: PLATINUM I page 3: 205 entries, 200 new seeds
+2026-09-22 23:17:58,471 INFO laneforge.ingest.seeds: PLATINUM I page 4: 205 entries, 200 new seeds
+2026-09-22 23:17:58,718 INFO laneforge.ingest.seeds: PLATINUM I page 5: 205 entries, 200 new seeds
+seeds: +8040 new, 8040 total, 40 pages fetched
+2026-09-22 23:17:58,862 INFO laneforge.ingest: crawl window 1788912000..1790133478 (epoch s)
+2026-09-22 23:17:59,046 INFO laneforge.ingest.crawl: seed xEjbGgj_NGM5 (GOLD IV): 0 match ids
+2026-09-22 23:17:59,180 INFO laneforge.ingest.crawl: seed BLgckIgSX7eR (GOLD IV): 0 match ids
+2026-09-22 23:17:59,286 INFO laneforge.ingest.crawl: seed 9jfvJxXlov9F (GOLD IV): 39 match ids
+2026-09-22 23:17:59,995 INFO laneforge.ingest.crawl: fetched NA1_5646565797 (GOLD) [1 this run]
+2026-09-22 23:18:00,934 INFO laneforge.ingest.crawl: fetched NA1_5646116874 (GOLD) [2 this run]
+2026-09-22 23:18:01,706 INFO laneforge.ingest.crawl: fetched NA1_5646081916 (GOLD) [3 this run]
+2026-09-22 23:18:02,422 INFO laneforge.ingest.crawl: fetched NA1_5646042436 (GOLD) [4 this run]
+2026-09-22 23:18:03,131 INFO laneforge.ingest.crawl: fetched NA1_5643788008 (GOLD) [5 this run]
+2026-09-22 23:18:03,874 INFO laneforge.ingest.crawl: fetched NA1_5643772642 (GOLD) [6 this run]
+2026-09-22 23:18:04,925 INFO laneforge.ingest.crawl: fetched NA1_5643771426 (GOLD) [7 this run]
+2026-09-22 23:18:05,707 INFO laneforge.ingest.crawl: fetched NA1_5643476547 (GOLD) [8 this run]
+2026-09-22 23:18:06,755 INFO laneforge.ingest.crawl: fetched NA1_5642377375 (GOLD) [9 this run]
+2026-09-22 23:18:07,557 INFO laneforge.ingest.crawl: fetched NA1_5642348561 (GOLD) [10 this run]
+2026-09-22 23:18:07,737 INFO laneforge.ingest.crawl: reject NA1_5642335991 before timeline: too_short: 923s < 960s
+2026-09-22 23:18:08,524 INFO laneforge.ingest.crawl: fetched NA1_5642310892 (GOLD) [11 this run]
+2026-09-22 23:18:09,407 INFO laneforge.ingest.crawl: fetched NA1_5642260562 (GOLD) [12 this run]
+2026-09-22 23:18:10,114 INFO laneforge.ingest.crawl: fetched NA1_5642242862 (GOLD) [13 this run]
+2026-09-22 23:18:10,841 INFO laneforge.ingest.crawl: fetched NA1_5642206723 (GOLD) [14 this run]
+2026-09-22 23:18:11,698 INFO laneforge.ingest.crawl: fetched NA1_5642189949 (GOLD) [15 this run]
+2026-09-22 23:18:12,381 INFO laneforge.ingest.crawl: fetched NA1_5641557453 (GOLD) [16 this run]
+2026-09-22 23:18:13,094 INFO laneforge.ingest.crawl: fetched NA1_5641307633 (GOLD) [17 this run]
+2026-09-22 23:18:13,872 INFO laneforge.ingest.crawl: fetched NA1_5641106651 (GOLD) [18 this run]
+2026-09-22 23:18:14,625 INFO laneforge.ingest.crawl: fetched NA1_5641079948 (GOLD) [19 this run]
+2026-09-22 23:18:15,190 INFO laneforge.ingest.crawl: fetched NA1_5641058324 (GOLD) [20 this run]
+2026-09-22 23:18:16,009 INFO laneforge.ingest.crawl: fetched NA1_5641022495 (GOLD) [21 this run]
+2026-09-22 23:18:16,944 INFO laneforge.ingest.crawl: fetched NA1_5640986969 (GOLD) [22 this run]
+2026-09-22 23:18:17,745 INFO laneforge.ingest.crawl: fetched NA1_5640968911 (GOLD) [23 this run]
+2026-09-22 23:18:18,717 INFO laneforge.ingest.crawl: fetched NA1_5640913699 (GOLD) [24 this run]
+2026-09-22 23:18:19,460 INFO laneforge.ingest.crawl: fetched NA1_5640862789 (GOLD) [25 this run]
+2026-09-22 23:18:20,234 INFO laneforge.ingest.crawl: fetched NA1_5640826310 (GOLD) [26 this run]
+2026-09-22 23:18:21,139 INFO laneforge.ingest.crawl: fetched NA1_5640796768 (GOLD) [27 this run]
+2026-09-22 23:18:21,925 INFO laneforge.ingest.crawl: fetched NA1_5640624875 (GOLD) [28 this run]
+2026-09-22 23:18:22,862 INFO laneforge.ingest.crawl: fetched NA1_5639690274 (GOLD) [29 this run]
+2026-09-22 23:18:23,712 INFO laneforge.ingest.crawl: fetched NA1_5639653988 (GOLD) [30 this run]
+2026-09-22 23:18:24,478 INFO laneforge.ingest.crawl: fetched NA1_5639628831 (GOLD) [31 this run]
+2026-09-22 23:18:25,273 INFO laneforge.ingest.crawl: fetched NA1_5639595768 (GOLD) [32 this run]
+2026-09-22 23:18:26,024 INFO laneforge.ingest.crawl: fetched NA1_5639573789 (GOLD) [33 this run]
+2026-09-22 23:18:26,310 INFO laneforge.ingest.crawl: reject NA1_5639026639 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:18:26,522 INFO laneforge.ingest.crawl: reject NA1_5639012867 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:18:26,756 INFO laneforge.ingest.crawl: reject NA1_5638940133 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:18:26,998 INFO laneforge.ingest.crawl: reject NA1_5638439265 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:18:27,333 INFO laneforge.ingest.crawl: reject NA1_5638415045 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:18:27,456 INFO laneforge.ingest.crawl: seed AiuNUmAkhgnA (GOLD IV): 0 match ids
+2026-09-22 23:18:27,571 INFO laneforge.ingest.crawl: seed KXZgUuogupnl (GOLD IV): 0 match ids
+2026-09-22 23:18:27,681 INFO laneforge.ingest.crawl: seed rNfjmcttoe59 (GOLD IV): 0 match ids
+2026-09-22 23:18:27,795 INFO laneforge.ingest.crawl: seed E9DZhKdCTBB3 (GOLD IV): 0 match ids
+2026-09-22 23:18:27,921 INFO laneforge.ingest.crawl: seed sXx646Ku2rqJ (GOLD IV): 0 match ids
+2026-09-22 23:18:28,039 INFO laneforge.ingest.crawl: seed TalwfjYblcO4 (GOLD IV): 0 match ids
+2026-09-22 23:18:28,190 INFO laneforge.ingest.crawl: seed _UNt6yxiSP3x (GOLD IV): 18 match ids
+2026-09-22 23:18:29,048 INFO laneforge.ingest.crawl: fetched NA1_5647039352 (GOLD) [34 this run]
+2026-09-22 23:18:29,848 INFO laneforge.ingest.crawl: fetched NA1_5646707436 (GOLD) [35 this run]
+2026-09-22 23:18:30,385 INFO laneforge.ingest.crawl: fetched NA1_5646690146 (GOLD) [36 this run]
+2026-09-22 23:18:31,193 INFO laneforge.ingest.crawl: fetched NA1_5645178214 (GOLD) [37 this run]
+2026-09-22 23:18:31,979 INFO laneforge.ingest.crawl: fetched NA1_5645167809 (GOLD) [38 this run]
+2026-09-22 23:18:32,549 INFO laneforge.ingest.crawl: fetched NA1_5644701962 (GOLD) [39 this run]
+2026-09-22 23:18:33,274 INFO laneforge.ingest.crawl: fetched NA1_5643305535 (GOLD) [40 this run]
+2026-09-22 23:18:33,473 INFO laneforge.ingest.crawl: reject NA1_5643311850 before timeline: too_short: 910s < 960s
+2026-09-22 23:18:33,664 INFO laneforge.ingest.crawl: reject NA1_5643294667 before timeline: early_surrender: remake
+2026-09-22 23:18:34,433 INFO laneforge.ingest.crawl: fetched NA1_5643290827 (GOLD) [41 this run]
+2026-09-22 23:19:59,752 INFO laneforge.ingest.crawl: fetched NA1_5640831782 (GOLD) [42 this run]
+2026-09-22 23:20:00,451 INFO laneforge.ingest.crawl: fetched NA1_5640808977 (GOLD) [43 this run]
+2026-09-22 23:20:01,126 INFO laneforge.ingest.crawl: fetched NA1_5640801821 (GOLD) [44 this run]
+2026-09-22 23:20:02,117 INFO laneforge.ingest.crawl: fetched NA1_5639369277 (GOLD) [45 this run]
+2026-09-22 23:20:02,945 INFO laneforge.ingest.crawl: fetched NA1_5639355587 (GOLD) [46 this run]
+2026-09-22 23:20:03,799 INFO laneforge.ingest.crawl: reject NA1_5638979243 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:04,141 INFO laneforge.ingest.crawl: reject NA1_5638957055 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:04,548 INFO laneforge.ingest.crawl: reject NA1_5638347271 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:04,662 INFO laneforge.ingest.crawl: seed kBffciuXCzlw (GOLD IV): 0 match ids
+2026-09-22 23:20:04,774 INFO laneforge.ingest.crawl: seed DYKi42lfThBj (GOLD IV): 0 match ids
+2026-09-22 23:20:04,900 INFO laneforge.ingest.crawl: seed d6B9QBJ01Y8e (GOLD IV): 0 match ids
+2026-09-22 23:20:05,013 INFO laneforge.ingest.crawl: seed AbIuoT4W7Ogi (GOLD IV): 0 match ids
+2026-09-22 23:20:05,151 INFO laneforge.ingest.crawl: seed IJlrHuM8MeA0 (GOLD IV): 0 match ids
+2026-09-22 23:20:05,271 INFO laneforge.ingest.crawl: seed sqOQZjARzXYs (GOLD IV): 0 match ids
+2026-09-22 23:20:05,844 INFO laneforge.ingest.crawl: seed WHZ28u-oEALA (GOLD IV): 40 match ids
+2026-09-22 23:20:07,339 INFO laneforge.ingest.crawl: fetched NA1_5646885268 (GOLD) [47 this run]
+2026-09-22 23:20:07,505 INFO laneforge.ingest.crawl: reject NA1_5646876670 before timeline: early_surrender: remake
+2026-09-22 23:20:08,402 INFO laneforge.ingest.crawl: fetched NA1_5646868525 (GOLD) [48 this run]
+2026-09-22 23:20:09,353 INFO laneforge.ingest.crawl: fetched NA1_5646798668 (GOLD) [49 this run]
+2026-09-22 23:20:10,123 INFO laneforge.ingest.crawl: fetched NA1_5644345815 (GOLD) [50 this run]
+2026-09-22 23:20:10,920 INFO laneforge.ingest.crawl: fetched NA1_5644337109 (GOLD) [51 this run]
+2026-09-22 23:20:11,686 INFO laneforge.ingest.crawl: fetched NA1_5644326920 (GOLD) [52 this run]
+2026-09-22 23:20:12,322 INFO laneforge.ingest.crawl: fetched NA1_5644317301 (GOLD) [53 this run]
+2026-09-22 23:20:13,027 INFO laneforge.ingest.crawl: fetched NA1_5644305402 (GOLD) [54 this run]
+2026-09-22 23:20:14,071 INFO laneforge.ingest.crawl: fetched NA1_5644116736 (GOLD) [55 this run]
+2026-09-22 23:20:15,148 INFO laneforge.ingest.crawl: fetched NA1_5644079780 (GOLD) [56 this run]
+2026-09-22 23:20:15,895 INFO laneforge.ingest.crawl: fetched NA1_5644052106 (GOLD) [57 this run]
+2026-09-22 23:20:16,775 INFO laneforge.ingest.crawl: fetched NA1_5644023960 (GOLD) [58 this run]
+2026-09-22 23:20:17,941 INFO laneforge.ingest.crawl: fetched NA1_5644003232 (GOLD) [59 this run]
+2026-09-22 23:20:18,637 INFO laneforge.ingest.crawl: fetched NA1_5643756278 (GOLD) [60 this run]
+2026-09-22 23:20:19,465 INFO laneforge.ingest.crawl: fetched NA1_5643757785 (GOLD) [61 this run]
+2026-09-22 23:20:20,193 INFO laneforge.ingest.crawl: fetched NA1_5643739407 (GOLD) [62 this run]
+2026-09-22 23:20:21,034 INFO laneforge.ingest.crawl: fetched NA1_5643727505 (GOLD) [63 this run]
+2026-09-22 23:20:21,817 INFO laneforge.ingest.crawl: fetched NA1_5643712522 (GOLD) [64 this run]
+2026-09-22 23:20:22,632 INFO laneforge.ingest.crawl: fetched NA1_5643702370 (GOLD) [65 this run]
+2026-09-22 23:20:23,585 INFO laneforge.ingest.crawl: fetched NA1_5643682364 (GOLD) [66 this run]
+2026-09-22 23:20:24,436 INFO laneforge.ingest.crawl: fetched NA1_5643671762 (GOLD) [67 this run]
+2026-09-22 23:20:25,257 INFO laneforge.ingest.crawl: fetched NA1_5643641894 (GOLD) [68 this run]
+2026-09-22 23:20:25,949 INFO laneforge.ingest.crawl: fetched NA1_5643605232 (GOLD) [69 this run]
+2026-09-22 23:20:26,836 INFO laneforge.ingest.crawl: fetched NA1_5640791691 (GOLD) [70 this run]
+2026-09-22 23:20:27,770 INFO laneforge.ingest.crawl: fetched NA1_5640768790 (GOLD) [71 this run]
+2026-09-22 23:20:28,791 INFO laneforge.ingest.crawl: fetched NA1_5640739497 (GOLD) [72 this run]
+2026-09-22 23:20:29,614 INFO laneforge.ingest.crawl: fetched NA1_5640536232 (GOLD) [73 this run]
+2026-09-22 23:20:30,457 INFO laneforge.ingest.crawl: fetched NA1_5640521332 (GOLD) [74 this run]
+2026-09-22 23:20:31,258 INFO laneforge.ingest.crawl: fetched NA1_5639875430 (GOLD) [75 this run]
+2026-09-22 23:20:32,169 INFO laneforge.ingest.crawl: fetched NA1_5639872623 (GOLD) [76 this run]
+2026-09-22 23:20:32,941 INFO laneforge.ingest.crawl: fetched NA1_5639870091 (GOLD) [77 this run]
+2026-09-22 23:20:33,804 INFO laneforge.ingest.crawl: fetched NA1_5639857060 (GOLD) [78 this run]
+2026-09-22 23:20:34,084 INFO laneforge.ingest.crawl: reject NA1_5638991410 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:34,287 INFO laneforge.ingest.crawl: reject NA1_5638952706 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:34,537 INFO laneforge.ingest.crawl: reject NA1_5638932956 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:34,755 INFO laneforge.ingest.crawl: reject NA1_5638872239 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:35,076 INFO laneforge.ingest.crawl: reject NA1_5638847565 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:35,387 INFO laneforge.ingest.crawl: reject NA1_5638848937 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:35,594 INFO laneforge.ingest.crawl: reject NA1_5638831367 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:20:35,716 INFO laneforge.ingest.crawl: seed mI7Gpn_OtKHJ (GOLD IV): 0 match ids
+2026-09-22 23:20:35,826 INFO laneforge.ingest.crawl: seed wzUZB17NqzH7 (GOLD IV): 0 match ids
+2026-09-22 23:20:35,939 INFO laneforge.ingest.crawl: seed v2gU_LzgVh8E (GOLD IV): 0 match ids
+2026-09-22 23:20:36,061 INFO laneforge.ingest.crawl: seed D_-HLiHkCyK9 (GOLD IV): 20 match ids
+2026-09-22 23:20:36,815 INFO laneforge.ingest.crawl: fetched NA1_5646512414 (GOLD) [79 this run]
+2026-09-22 23:20:37,636 INFO laneforge.ingest.crawl: fetched NA1_5645949536 (GOLD) [80 this run]
+2026-09-22 23:22:00,260 INFO laneforge.ingest.crawl: fetched NA1_5645927984 (GOLD) [81 this run]
+2026-09-22 23:22:01,225 INFO laneforge.ingest.crawl: fetched NA1_5645537031 (GOLD) [82 this run]
+2026-09-22 23:22:02,018 INFO laneforge.ingest.crawl: fetched NA1_5643985818 (GOLD) [83 this run]
+2026-09-22 23:22:02,866 INFO laneforge.ingest.crawl: fetched NA1_5643919780 (GOLD) [84 this run]
+2026-09-22 23:22:03,805 INFO laneforge.ingest.crawl: fetched NA1_5643488336 (GOLD) [85 this run]
+2026-09-22 23:22:04,664 INFO laneforge.ingest.crawl: fetched NA1_5643452531 (GOLD) [86 this run]
+2026-09-22 23:22:05,484 INFO laneforge.ingest.crawl: fetched NA1_5643414387 (GOLD) [87 this run]
+2026-09-22 23:22:06,324 INFO laneforge.ingest.crawl: fetched NA1_5643396031 (GOLD) [88 this run]
+2026-09-22 23:22:07,195 INFO laneforge.ingest.crawl: fetched NA1_5643259154 (GOLD) [89 this run]
+2026-09-22 23:22:08,111 INFO laneforge.ingest.crawl: fetched NA1_5642804607 (GOLD) [90 this run]
+2026-09-22 23:22:09,210 INFO laneforge.ingest.crawl: fetched NA1_5642222650 (GOLD) [91 this run]
+2026-09-22 23:22:10,294 INFO laneforge.ingest.crawl: fetched NA1_5642199401 (GOLD) [92 this run]
+2026-09-22 23:22:11,506 INFO laneforge.ingest.crawl: fetched NA1_5641582914 (GOLD) [93 this run]
+2026-09-22 23:22:12,406 INFO laneforge.ingest.crawl: fetched NA1_5641464352 (GOLD) [94 this run]
+2026-09-22 23:22:13,101 INFO laneforge.ingest.crawl: fetched NA1_5641441692 (GOLD) [95 this run]
+2026-09-22 23:22:13,282 INFO laneforge.ingest.crawl: reject NA1_5641449819 before timeline: early_surrender: remake
+2026-09-22 23:22:14,033 INFO laneforge.ingest.crawl: fetched NA1_5641427147 (GOLD) [96 this run]
+2026-09-22 23:22:14,278 INFO laneforge.ingest.crawl: reject NA1_5641412019 before timeline: too_short: 926s < 960s
+2026-09-22 23:22:14,420 INFO laneforge.ingest.crawl: seed 4QqrcxTBfEIZ (GOLD IV): 0 match ids
+2026-09-22 23:22:14,532 INFO laneforge.ingest.crawl: seed buSP3f4BkEYG (GOLD IV): 0 match ids
+2026-09-22 23:22:14,681 INFO laneforge.ingest.crawl: seed Kye7kmmB6A5L (GOLD IV): 0 match ids
+2026-09-22 23:22:14,817 INFO laneforge.ingest.crawl: seed oOxeTeM26EeW (GOLD IV): 0 match ids
+2026-09-22 23:22:14,972 INFO laneforge.ingest.crawl: seed N_jo0wbC25Xt (GOLD IV): 0 match ids
+2026-09-22 23:22:15,193 INFO laneforge.ingest.crawl: seed 7fJvDc9lVeEt (GOLD IV): 0 match ids
+2026-09-22 23:22:15,319 INFO laneforge.ingest.crawl: seed znxF0He7up1Y (GOLD IV): 0 match ids
+2026-09-22 23:22:15,431 INFO laneforge.ingest.crawl: seed sUmv536EbakC (GOLD IV): 25 match ids
+2026-09-22 23:22:16,382 INFO laneforge.ingest.crawl: fetched NA1_5642260191 (GOLD) [97 this run]
+2026-09-22 23:22:17,584 INFO laneforge.ingest.crawl: fetched NA1_5641451240 (GOLD) [98 this run]
+2026-09-22 23:22:18,407 INFO laneforge.ingest.crawl: fetched NA1_5641435342 (GOLD) [99 this run]
+2026-09-22 23:22:19,212 INFO laneforge.ingest.crawl: fetched NA1_5641419830 (GOLD) [100 this run]
+2026-09-22 23:22:19,508 INFO laneforge.ingest.crawl: reject NA1_5640048702 before timeline: too_short: 776s < 960s
+2026-09-22 23:22:20,275 INFO laneforge.ingest.crawl: fetched NA1_5640040809 (GOLD) [101 this run]
+2026-09-22 23:22:21,014 INFO laneforge.ingest.crawl: fetched NA1_5639913883 (GOLD) [102 this run]
+2026-09-22 23:22:21,916 INFO laneforge.ingest.crawl: fetched NA1_5639902546 (GOLD) [103 this run]
+2026-09-22 23:22:22,701 INFO laneforge.ingest.crawl: fetched NA1_5639892211 (GOLD) [104 this run]
+2026-09-22 23:22:23,362 INFO laneforge.ingest.crawl: fetched NA1_5639889660 (GOLD) [105 this run]
+2026-09-22 23:22:24,500 INFO laneforge.ingest.crawl: fetched NA1_5639879838 (GOLD) [106 this run]
+2026-09-22 23:22:29,226 INFO laneforge.ingest.crawl: fetched NA1_5639871123 (GOLD) [107 this run]
+2026-09-22 23:22:30,500 INFO laneforge.ingest.crawl: fetched NA1_5639477169 (GOLD) [108 this run]
+2026-09-22 23:22:31,396 INFO laneforge.ingest.crawl: fetched NA1_5639446679 (GOLD) [109 this run]
+2026-09-22 23:22:32,108 INFO laneforge.ingest.crawl: fetched NA1_5639384686 (GOLD) [110 this run]
+2026-09-22 23:22:32,466 INFO laneforge.ingest.crawl: reject NA1_5639257004 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:32,659 INFO laneforge.ingest.crawl: reject NA1_5639251045 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:32,944 INFO laneforge.ingest.crawl: reject NA1_5638728497 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:33,143 INFO laneforge.ingest.crawl: reject NA1_5638719232 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:33,352 INFO laneforge.ingest.crawl: reject NA1_5638707532 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:33,592 INFO laneforge.ingest.crawl: reject NA1_5638703965 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:33,838 INFO laneforge.ingest.crawl: reject NA1_5638686757 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:34,256 INFO laneforge.ingest.crawl: reject NA1_5638671455 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:34,471 INFO laneforge.ingest.crawl: reject NA1_5638673099 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:34,721 INFO laneforge.ingest.crawl: reject NA1_5638663313 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:34,868 INFO laneforge.ingest.crawl: seed Ll9mjIcPmix_ (GOLD IV): 0 match ids
+2026-09-22 23:22:35,014 INFO laneforge.ingest.crawl: seed aMt7Jonr3ZEp (GOLD IV): 0 match ids
+2026-09-22 23:22:35,173 INFO laneforge.ingest.crawl: seed P3stgb-NKXPu (GOLD IV): 0 match ids
+2026-09-22 23:22:35,300 INFO laneforge.ingest.crawl: seed gxplgnfKaOhN (GOLD IV): 6 match ids
+2026-09-22 23:22:36,004 INFO laneforge.ingest.crawl: fetched NA1_5644080504 (GOLD) [111 this run]
+2026-09-22 23:22:36,642 INFO laneforge.ingest.crawl: fetched NA1_5642046039 (GOLD) [112 this run]
+2026-09-22 23:22:37,605 INFO laneforge.ingest.crawl: fetched NA1_5641716591 (GOLD) [113 this run]
+2026-09-22 23:22:38,414 INFO laneforge.ingest.crawl: fetched NA1_5641685869 (GOLD) [114 this run]
+2026-09-22 23:22:39,129 INFO laneforge.ingest.crawl: fetched NA1_5641584954 (GOLD) [115 this run]
+2026-09-22 23:22:39,320 INFO laneforge.ingest.crawl: reject NA1_5638749345 before timeline: wrong_patch: gameVersion 16.17.810.4348 is not patch 16.18
+2026-09-22 23:22:39,458 INFO laneforge.ingest.crawl: seed 0abEuHQ34i0Q (GOLD IV): 0 match ids
+2026-09-22 23:22:39,585 INFO laneforge.ingest.crawl: seed qykseGf0vBcU (GOLD IV): 0 match ids
+2026-09-22 23:22:39,704 INFO laneforge.ingest.crawl: seed sUoHE3TeIp-4 (GOLD IV): 0 match ids
+2026-09-22 23:22:39,836 INFO laneforge.ingest.crawl: seed H3ViSTJ7YgHN (GOLD IV): 6 match ids

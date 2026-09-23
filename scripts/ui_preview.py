@@ -13,8 +13,7 @@ Champion and item names and stats come from the checked-in Data Dragon files
 from __future__ import annotations
 
 import json
-import math
-import re
+import os
 import sys
 from datetime import datetime, timedelta
 from functools import lru_cache
@@ -26,6 +25,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from laneforge.ingest.ddragon import parse_stats_block
+from laneforge.queries.stats import wilson_interval
 from laneforge.queries.models import (  # noqa: E402
     ROLE_LABELS, ROLES, BuildRow, ChampionOverview, ChampionRef, CompMember, CompProfile,
     DatasetSummary, Evidence, ItemRef, LadderAnswer, MatchDetail, MatchSummary, MatchupStat,
@@ -85,14 +86,7 @@ FILTERS = {"pct": f_pct, "pct1": f_pct1, "num": f_num, "gold": f_gold,
 GLOBALS = {"champion_img": champion_img, "item_img": item_img, "ddragon_version": DDRAGON_VERSION}
 
 
-def wilson(wins: int, games: int, z: float = 1.96) -> tuple[float, float]:
-    if games == 0:
-        return (0.0, 0.0)
-    p = wins / games
-    denom = 1 + z * z / games
-    centre = p + z * z / (2 * games)
-    spread = z * math.sqrt(p * (1 - p) / games + z * z / (4 * games * games))
-    return ((centre - spread) / denom, (centre + spread) / denom)
+wilson = wilson_interval   # the real implementation; the preview must not drift from it
 
 
 # --------------------------------------------------------------------------- catalogue
@@ -101,23 +95,13 @@ STAT_MAP = {"FlatMagicDamageMod": "ability_power", "FlatPhysicalDamageMod": "att
             "FlatHPPoolMod": "health", "FlatMPPoolMod": "mana", "FlatArmorMod": "armor",
             "FlatSpellBlockMod": "magic_resist", "FlatMovementSpeedMod": "move_speed",
             "PercentAttackSpeedMod": "attack_speed_pct", "FlatCritChanceMod": "crit_chance_pct"}
-DESC_MAP = {"Ability Haste": "ability_haste", "Lethality": "lethality", "Tenacity": "tenacity_pct",
-            "Life Steal": "life_steal_pct", "Armor Penetration": "armor_pen_pct"}
 GRIEVOUS = {"3165", "3075", "3033", "3123", "3916", "6609", "3076", "3011"}
 
 
 def _desc_stats(description: str) -> dict:
-    block = re.search(r"<stats>(.*?)</stats>", description or "")
-    out: dict = {}
-    if not block:
-        return out
-    for value, pct, label in re.findall(r"<attention>(\d+)(%?)</attention>\s*([A-Za-z ]+)", block.group(1)):
-        key = DESC_MAP.get(label.strip())
-        if label.strip() == "Magic Penetration":
-            key = "magic_pen_pct" if pct else "magic_pen_flat"
-        if key:
-            out[key] = int(value) / 100 if (pct or key.endswith("_pct")) else int(value)
-    return out
+    """The loader's own <stats> parser, so preview items match loaded items."""
+    parsed, _unparsed = parse_stats_block(description or "")
+    return dict(parsed)
 
 
 @lru_cache(maxsize=1)
@@ -504,4 +488,4 @@ def render_template_string_index() -> str:
 
 
 if __name__ == "__main__":
-    create_app().run(host="127.0.0.1", port=PORT, debug=True)
+    create_app().run(host="127.0.0.1", port=PORT, debug=os.environ.get("FLASK_DEBUG") == "1")

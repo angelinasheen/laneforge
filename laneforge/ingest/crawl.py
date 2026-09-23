@@ -8,6 +8,7 @@ and resumed with the same command.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -46,6 +47,7 @@ STOP_AUTH = "auth"
 STOP_INTERRUPTED = "interrupted"
 STOP_SERVER = "server_error"
 
+MATCH_ID_SHAPE = re.compile(r"[A-Z0-9]{1,10}_[0-9]{1,20}")   # e.g. NA1_5646690146
 OUTCOME_FETCHED = "fetched"
 OUTCOME_MISSING = "missing"
 OUTCOME_ON_DISK = "already_on_disk"
@@ -91,6 +93,14 @@ def _day_start(day: date) -> datetime:
     return datetime(day.year, day.month, day.day, tzinfo=timezone.utc)
 
 
+def _checked_match_id(value: object) -> str:
+    """Match ids become file names under data/raw; refuse anything but Riot's shape."""
+    match_id = str(value)
+    if not MATCH_ID_SHAPE.fullmatch(match_id):
+        raise ValueError(f"unexpected match id {match_id!r} from the match list")
+    return match_id
+
+
 def list_match_ids(client: JsonClient, puuid: str, window: CrawlWindow) -> tuple[str, ...]:
     """All ranked solo/duo match ids for `puuid` in the window, newest first."""
     ids: list[str] = []
@@ -103,7 +113,7 @@ def list_match_ids(client: JsonClient, puuid: str, window: CrawlWindow) -> tuple
         })
         if not isinstance(page, list):
             raise ValueError(f"match id list for {puuid} was {type(page).__name__}, not a list")
-        ids.extend(str(match_id) for match_id in page)
+        ids.extend(_checked_match_id(match_id) for match_id in page)
         if len(page) < MATCH_ID_PAGE_SIZE:
             return tuple(dict.fromkeys(ids))
         start += MATCH_ID_PAGE_SIZE

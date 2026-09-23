@@ -10,7 +10,6 @@ from laneforge.queries.models import (
 
 MAX_MATCHES = 200
 TOP_MATCHUPS = 8
-BLUE, RED = 100, 200
 
 SQL_RECENT_MATCHES = """
 SELECT m.match_id, m.game_version, m.start_time, m.duration_seconds, m.winning_team, m.seed_tier,

@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 from laneforge.queries.errors import ValidationError
 from laneforge.queries.models import ROLE_LABELS, ROLES
 from laneforge.queries.validate import (
-    require_distinct_matchup, require_enemies, require_role,
+    MAX_ENEMIES, require_distinct_matchup, require_enemies, require_role,
 )
 
 LABEL_TO_ROLE = {label.upper(): role for role, label in ROLE_LABELS.items()}
@@ -48,8 +48,12 @@ def parse_role(value) -> str:
 
 
 def parse_enemies(values) -> tuple[int, ...]:
-    """Blank selects are ignored; the rest must be champion ids."""
-    return tuple(parse_int(v, "enemy champion") for v in values if (v or "").strip())
+    """Blank selects are ignored; the rest must be champion ids. The count is
+    checked before any value is parsed so a flood of repeated fields costs nothing."""
+    present = [v for v in values if (v or "").strip()]
+    if len(present) > MAX_ENEMIES:
+        raise ValidationError(f"At most {MAX_ENEMIES} other enemy champions can be named.")
+    return tuple(parse_int(v, "enemy champion") for v in present)
 
 
 def parse_matchup(args) -> MatchupQuery:
