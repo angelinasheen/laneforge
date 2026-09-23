@@ -66,6 +66,8 @@ def _parser() -> argparse.ArgumentParser:
     crawl.add_argument("--since", type=date.fromisoformat, help="YYYY-MM-DD (UTC), default 21 days ago")
     crawl.add_argument("--until", type=date.fromisoformat, help="YYYY-MM-DD inclusive, default now")
     crawl.add_argument("--limit", type=_non_negative, help="stop after N new matches")
+    crawl.add_argument("--patch", help="reject off-patch matches before fetching their timeline; "
+                                       "default from DDRAGON_VERSION or data/ddragon/VERSION")
     crawl.set_defaults(handler=cmd_crawl)
 
     load = sub.add_parser("load", help="load raw files into the database, then refresh views")
@@ -114,7 +116,7 @@ def cmd_crawl(args, paths: DataPaths) -> int:
     window = window_from_dates(args.since, args.until)
     log.info("crawl window %d..%d (epoch s)", window.start_s, window.end_s)
     with _client() as client:
-        report = crawl(client, paths, window, args.limit)
+        report = crawl(client, paths, window, args.limit, patch=_patch(args))
     print(f"crawl {report.stopped}: {report.fetched} fetched, {report.missing} missing, "
           f"seed cursor {report.seed_index}. {report.message}")
     if report.stopped == STOP_AUTH:

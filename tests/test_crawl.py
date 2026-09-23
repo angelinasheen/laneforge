@@ -190,3 +190,20 @@ def test_collect_seeds_dedupes_and_resumes(tmp_path):
     assert [s.puuid for s in read_seeds(paths.seeds)] == ["a", "b", "c"]
     assert read_seeds(paths.seeds)[0].division == "IV"
     assert second.added == 0 and rerun.calls == []
+
+
+def test_crawl_with_patch_rejects_off_patch_match_before_its_timeline(paths):
+    # Arrange: the fake match payload has no gameVersion, so admission rejects it.
+    client = FakeClient({"p-gold": ["NA1_1"], "p-plat": []})
+
+    # Act
+    report = crawl(client, paths, WINDOW, patch="16.18")
+
+    # Assert: one match request, zero timeline requests, nothing on disk, outcome recorded.
+    assert report.fetched == 0
+    assert len(client.urls("/matches/NA1_1")) == 1
+    assert client.urls("/timeline") == []
+    assert raw_match_ids(paths.raw) == ()
+    checkpoint = load_checkpoint(paths.checkpoint)
+    assert "NA1_1" in checkpoint.seen
+    assert checkpoint.counts.get("rejected") == 1

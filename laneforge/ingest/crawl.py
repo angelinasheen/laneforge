@@ -13,6 +13,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
+from laneforge.ingest.admission import admit
 from laneforge.ingest.checkpoint import Checkpoint, load_checkpoint, save_checkpoint
 from laneforge.ingest.riot import (
     RANKED_SOLO_QUEUE_ID,
@@ -48,6 +49,7 @@ STOP_SERVER = "server_error"
 OUTCOME_FETCHED = "fetched"
 OUTCOME_MISSING = "missing"
 OUTCOME_ON_DISK = "already_on_disk"
+OUTCOME_REJECTED = "rejected"      # match fetched, failed admission, timeline never requested
 COUNT_ERRORS = "errors"
 
 
@@ -131,15 +133,19 @@ class _Run:
 
 
 def crawl(client: JsonClient, paths: DataPaths, window: CrawlWindow,
-          limit: int | None = None) -> CrawlReport:
-    """Fetch unseen matches for every seed from the checkpoint's cursor on."""
+          limit: int | None = None, patch: str | None = None) -> CrawlReport:
+    """Fetch unseen matches for every seed from the checkpoint's cursor on.
+
+    When `patch` is given, a match that would fail admission (wrong patch,
+    remake, missing roles) is recorded as rejected right after the match
+    request, so its timeline is never fetched: one request instead of two."""
     seeds = read_seeds(paths.seeds)
     if not seeds:
         return CrawlReport(0, 0, STOP_DONE, "no seeds; run `seed` first")
     run = _Run(load_checkpoint(paths.checkpoint), paths.checkpoint, limit)
     try:
         for index in range(run.checkpoint.seed_index, len(seeds)):
-            if not _crawl_seed(client, paths.raw, seeds[index], window, run):
+            if not _crawl_seed(client, paths.raw, seeds[index], window, run, patch):
                 return run.report(STOP_LIMIT, f"stopped after {run.fetched} matches (--limit)")
             run.record(run.checkpoint.with_seed_index(index + 1))
     except RiotAuthError as exc:
@@ -152,7 +158,7 @@ def crawl(client: JsonClient, paths: DataPaths, window: CrawlWindow,
 
 
 def _crawl_seed(client: JsonClient, raw_dir: Path, seed: Seed, window: CrawlWindow,
-                run: _Run) -> bool:
+                run: _Run, patch: str | None = None) -> bool:
     """Handle every unseen match of one seed. False when the run limit stops us."""
     match_ids = list_match_ids(client, seed.puuid, window)
     run.record(run.checkpoint.with_count("requests", 1))
@@ -166,13 +172,20 @@ def _crawl_seed(client: JsonClient, raw_dir: Path, seed: Seed, window: CrawlWind
             continue
         if run.limit_reached():
             return False
-        _fetch_one(client, raw_dir, match_id, seed.tier, run)
+        _fetch_one(client, raw_dir, match_id, seed.tier, run, patch)
     return True
 
 
-def _fetch_one(client: JsonClient, raw_dir: Path, match_id: str, tier: str, run: _Run) -> None:
+def _fetch_one(client: JsonClient, raw_dir: Path, match_id: str, tier: str, run: _Run,
+               patch: str | None = None) -> None:
     try:
         match = client.get_json(match_url(match_id))
+        rejection = admit(match, patch) if patch else None
+        if rejection is not None:
+            log.info("reject %s before timeline: %s", match_id, rejection)
+            run.record(run.checkpoint.with_match(match_id, None, OUTCOME_REJECTED)
+                       .with_count("requests", 1))
+            return
         timeline = client.get_json(timeline_url(match_id))
     except NotFound as exc:
         log.info("skip %s: %s", match_id, exc)
